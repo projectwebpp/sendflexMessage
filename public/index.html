@@ -393,7 +393,7 @@ document.getElementById('cntS').addEventListener('input', e => syncCnt(e.target.
 document.getElementById('dlyS').addEventListener('input', e => syncDly(e.target.value));
 
 // ============================================================
-// 5. จัดการ Flex Message JSON
+// 5. จัดการ Flex Message JSON (ตรวจสอบ extra fields)
 // ============================================================
 function validateJ() {
   const raw = document.getElementById('jInp').value.trim();
@@ -408,11 +408,34 @@ function validateJ() {
     const p = JSON.parse(raw);
     const b = new Blob([raw]).size;
     bj.textContent = b > 1024 ? (b/1024).toFixed(1) + ' KB' : b + ' B';
-    const t = p.type || '?';
-    const info = t === 'flex' ? ('contents:' + (p.contents ? '✓' : '✗')) : ('type:'+t+' → จะ wrap อัตโนมัติ');
-    st.className = 'jst ok';
-    stx.textContent = '✓ ' + info;
-    return true;
+    
+    // ตรวจสอบว่าเป็น Flex Message ที่ถูกต้อง (ไม่มี extra field ที่ root)
+    let isValid = true;
+    let extraFields = [];
+    if (p.type === 'flex') {
+      const allowed = ['type', 'altText', 'contents'];
+      Object.keys(p).forEach(k => {
+        if (!allowed.includes(k)) extraFields.push(k);
+      });
+      if (extraFields.length) isValid = false;
+      if (!p.contents) isValid = false;
+    } else {
+      // ถ้าไม่ใช่ type:'flex' จะถูก wrap ทีหลัง แต่ควรเตือน
+      if (p.contents && !p.type) isValid = true; // อาจจะ wrap ได้
+      else if (!p.contents && !p.type) isValid = false;
+    }
+
+    if (isValid && extraFields.length === 0) {
+      st.className = 'jst ok';
+      stx.textContent = '✓ JSON ถูกต้อง (ไม่มี extra fields)';
+    } else if (extraFields.length) {
+      st.className = 'jst err';
+      stx.textContent = `⚠️ มี extra fields ที่ root: ${extraFields.join(', ')} (LINE จะ reject)`;
+    } else {
+      st.className = 'jst err';
+      stx.textContent = '✗ โครงสร้างไม่ถูกต้อง (ต้องมี type:"flex", altText, contents)';
+    }
+    return isValid && extraFields.length === 0;
   } catch(e) {
     st.className = 'jst err';
     stx.textContent = '✗ ' + e.message;
@@ -610,6 +633,12 @@ async function onSaveFlex() {
   let parsed;
   try { parsed = JSON.parse(jsonRaw); }
   catch(e) { return Toast.fire({icon:'error', title:'JSON parse error', text:e.message}); }
+  
+  // ถ้า JSON ไม่ถูกต้อง (extra fields) ให้เตือน
+  if (!validateJ()) {
+    return Toast.fire({icon:'error', title:'JSON ไม่ถูกต้อง', text:'กรุณาแก้ไข extra fields ที่ root หรือโครงสร้างให้ถูกต้อง'});
+  }
+  
   let flexMsg;
   if (parsed.type === 'flex' && parsed.contents) flexMsg = parsed;
   else {
