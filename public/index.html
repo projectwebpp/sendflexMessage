@@ -8,338 +8,148 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
-:root {
-  --bg: #0d0d0f;
-  --surface: #17171b;
-  --surface2: #1f1f25;
-  --surface3: #27272f;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-  --text: #f0f0f2;
-  --text2: #9898a6;
-  --text3: #4a4a5a;
-  --green: #00e676;
-  --green-dim: rgba(0,230,118,0.1);
-  --blue: #4da6ff;
-  --blue-dim: rgba(77,166,255,0.1);
-  --red: #ff5252;
-  --red-dim: rgba(255,82,82,0.1);
-  --amber: #ffab40;
-  --amber-dim: rgba(255,171,64,0.1);
-  --purple: #ce93d8;
-  --purple-dim: rgba(206,147,216,0.1);
-  --font: 'IBM Plex Sans Thai', sans-serif;
-  --mono: 'JetBrains Mono', monospace;
-  --r: 14px;
-  --r-sm: 8px;
-  --r-xs: 6px;
+:root{
+  --bg:#0d0d0f;--surface:#17171b;--surface2:#1f1f25;--surface3:#27272f;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#f0f0f2;--text2:#9898a6;--text3:#4a4a5a;
+  --green:#00e676;--gdim:rgba(0,230,118,.1);
+  --blue:#4da6ff; --bdim:rgba(77,166,255,.1);
+  --red:#ff5252;  --rdim:rgba(255,82,82,.1);
+  --amber:#ffab40;--adim:rgba(255,171,64,.1);
+  --purple:#ce93d8;--pdim:rgba(206,147,216,.1);
+  --font:'IBM Plex Sans Thai',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r:14px;--rsm:8px;--rxs:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{
-  font-family:var(--font);
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  padding-bottom:3rem;
-  -webkit-font-smoothing:antialiased;
-}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:3rem;-webkit-font-smoothing:antialiased;}
 
-/* ── HEADER ── */
-.header{
-  position:sticky;top:0;z-index:200;
-  background:rgba(13,13,15,0.9);
-  backdrop-filter:blur(24px);
-  -webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);
-  padding:.85rem 1.1rem;
-  display:flex;align-items:center;gap:10px;
-}
-.logo{
-  width:34px;height:34px;
-  background:linear-gradient(135deg,#00c300,#00e676);
-  border-radius:9px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:17px;
-  box-shadow:0 0 16px rgba(0,230,118,.28);
-}
-.header-text h1{font-size:15px;font-weight:600;letter-spacing:-.3px;}
-.header-text p{font-size:10px;color:var(--text2);margin-top:1px;}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-.pill{
-  display:flex;align-items:center;gap:5px;
-  border-radius:20px;padding:4px 9px;
-  font-size:11px;font-weight:500;cursor:pointer;
-  transition:opacity .2s;border:1px solid transparent;
-}
-.pill:active{opacity:.7;}
-.pill-green{background:var(--green-dim);border-color:rgba(0,230,118,.22);color:var(--green);}
-.pill-red  {background:var(--red-dim);  border-color:rgba(255,82,82,.22); color:var(--red);}
-.pill-amber{background:var(--amber-dim);border-color:rgba(255,171,64,.22);color:var(--amber);}
-.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* ── LOADING SCREEN ── */
-#loadScreen{
-  position:fixed;inset:0;z-index:9999;
-  background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-  transition:opacity .4s;
-}
+/* LOAD */
+#loadScreen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
 #loadScreen.hide{opacity:0;pointer-events:none;}
-.load-logo{
-  width:56px;height:56px;
-  background:linear-gradient(135deg,#00c300,#00e676);
-  border-radius:16px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;
-  box-shadow:0 0 30px rgba(0,230,118,.35);
-  animation:pop .5s cubic-bezier(.34,1.56,.64,1);
-}
+.load-logo{width:56px;height:56px;background:linear-gradient(135deg,#00c300,#00e676);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 30px rgba(0,230,118,.35);animation:pop .5s cubic-bezier(.34,1.56,.64,1);}
 @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 .load-title{font-size:17px;font-weight:600;}
-.load-sub{font-size:12px;color:var(--text2);}
+.load-sub{font-size:12px;color:var(--text2);text-align:center;padding:0 2rem;}
 .load-bar-wrap{width:180px;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
 .load-bar{height:100%;width:0%;background:linear-gradient(90deg,#00b300,#00e676);border-radius:2px;transition:width .4s ease;}
 
-/* ── MAIN ── */
-.container{padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;}
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:200;background:rgba(13,13,15,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:.85rem 1.1rem;display:flex;align-items:center;gap:10px;}
+.logo{width:34px;height:34px;background:linear-gradient(135deg,#00c300,#00e676);border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 16px rgba(0,230,118,.28);}
+.hdr-text h1{font-size:15px;font-weight:600;letter-spacing:-.3px;}
+.hdr-text p{font-size:10px;color:var(--text2);margin-top:1px;}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:7px;}
+.pill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:opacity .2s;}
+.pill:active{opacity:.7;}
+.pill-green{background:var(--gdim);border-color:rgba(0,230,118,.22);color:var(--green);}
+.pill-amber{background:var(--adim);border-color:rgba(255,171,64,.22);color:var(--amber);}
+.pill-red  {background:var(--rdim);border-color:rgba(255,82,82,.22); color:var(--red);}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* ── CARD ── */
-.card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  overflow:hidden;
-}
-.card-hdr{
-  padding:.75rem 1rem;
-  display:flex;align-items:center;gap:9px;
-  border-bottom:1px solid var(--border);
-  background:var(--surface2);
-}
-.cicon{
-  width:26px;height:26px;border-radius:var(--r-xs);
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;flex-shrink:0;
-}
-.ci-blue  {background:var(--blue-dim);  color:var(--blue);}
-.ci-green {background:var(--green-dim); color:var(--green);}
-.ci-amber {background:var(--amber-dim); color:var(--amber);}
-.ci-purple{background:var(--purple-dim);color:var(--purple);}
-.ci-red   {background:var(--red-dim);   color:var(--red);}
+/* CONTAINER */
+.wrap{padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.card-hdr{padding:.75rem 1rem;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.ci{width:26px;height:26px;border-radius:var(--rxs);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.ci-blue  {background:var(--bdim);color:var(--blue);}
+.ci-green {background:var(--gdim);color:var(--green);}
+.ci-amber {background:var(--adim);color:var(--amber);}
+.ci-purple{background:var(--pdim);color:var(--purple);}
 .card-hdr h2{font-size:12.5px;font-weight:600;}
-.card-hdr .badge{
-  margin-left:auto;
-  font-size:10px;padding:2px 7px;border-radius:10px;
-  background:var(--surface3);color:var(--text2);
-  white-space:nowrap;
-}
+.badge{margin-left:auto;font-size:10px;padding:2px 7px;border-radius:10px;background:var(--surface3);color:var(--text2);white-space:nowrap;}
 .card-body{padding:.9rem 1rem;}
+.field{margin-bottom:.8rem;}
+.field:last-child{margin-bottom:0;}
 
-/* ── EXEC URL BANNER ── */
-.exec-banner{
-  display:flex;align-items:center;gap:8px;
-  background:var(--surface2);
-  border:1px solid var(--border2);
-  border-radius:var(--r-sm);
-  padding:.65rem .85rem;
-  margin-bottom:.9rem;
-  cursor:pointer;
-  transition:border-color .2s;
-}
-.exec-banner:hover{border-color:rgba(77,166,255,.35);}
-.exec-banner input{
-  flex:1;background:none;border:none;outline:none;
-  font-family:var(--mono);font-size:11px;color:var(--text);
-  min-width:0;
-}
-.exec-banner input::placeholder{color:var(--text3);}
-.exec-go{
-  background:var(--blue-dim);border:1px solid rgba(77,166,255,.3);
-  border-radius:var(--r-xs);color:var(--blue);
-  font-size:11px;font-weight:500;font-family:var(--font);
-  padding:5px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;
-  transition:background .15s;
-}
-.exec-go:hover{background:rgba(77,166,255,.2);}
-.exec-go:disabled{opacity:.4;cursor:not-allowed;}
-
-/* ── FORM ── */
-label{
-  display:block;font-size:11px;font-weight:500;
-  color:var(--text2);margin-bottom:5px;
-  letter-spacing:.3px;text-transform:uppercase;
-}
-input[type=text],input[type=password],input[type=number],select{
-  width:100%;
-  background:var(--surface3);
-  border:1px solid var(--border2);
-  border-radius:var(--r-sm);
-  color:var(--text);
-  font-family:var(--mono);font-size:12.5px;
-  padding:9px 11px;outline:none;
-  transition:border-color .2s,box-shadow .2s;
-  -webkit-appearance:none;appearance:none;
-}
+/* FORM */
+label{display:block;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase;}
+input[type=text],input[type=password],input[type=number],select{width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:12.5px;padding:9px 11px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none;}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239898a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
 input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(77,166,255,.14);}
 input::placeholder{color:var(--text3);}
-textarea{
-  width:100%;background:var(--surface3);
-  border:1px solid var(--border2);
-  border-radius:var(--r-sm);
-  color:var(--text);font-family:var(--mono);font-size:11.5px;
-  padding:9px 11px;outline:none;resize:vertical;
-  min-height:190px;line-height:1.65;
-  transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
-}
+textarea{width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:11.5px;padding:9px 11px;outline:none;resize:vertical;min-height:190px;line-height:1.65;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
 textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(77,166,255,.14);}
-.field{margin-bottom:.8rem;}
-.field:last-child{margin-bottom:0;}
 .helper{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5;}
-.helper a{color:var(--blue);text-decoration:none;}
-.helper b{color:var(--amber);}
-
-/* row utils */
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.input-wrap{position:relative;}
-.vis-btn{
-  position:absolute;right:9px;top:50%;transform:translateY(-50%);
-  background:none;border:none;color:var(--text3);
-  cursor:pointer;font-size:13px;padding:4px;line-height:1;
-  transition:color .2s;
-}
-.vis-btn:hover{color:var(--text2);}
+.iw{position:relative;}
+.vis{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:4px;line-height:1;}
 
-/* ── SLIDER ── */
-.slider-row{display:flex;align-items:center;gap:10px;margin-top:6px;}
-input[type=range]{
-  flex:1;-webkit-appearance:none;appearance:none;
-  height:3px;background:var(--surface3);border-radius:2px;outline:none;
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:16px;height:16px;
-  border-radius:50%;background:var(--blue);cursor:pointer;
-  box-shadow:0 0 8px rgba(77,166,255,.4);
-}
-.slider-val{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--blue);min-width:44px;text-align:right;}
+/* SLIDER */
+.srow{display:flex;align-items:center;gap:10px;margin-top:6px;}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:3px;background:var(--surface3);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--blue);cursor:pointer;box-shadow:0 0 8px rgba(77,166,255,.4);}
+.sval{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--blue);min-width:50px;text-align:right;}
 
-/* ── STATS STRIP ── */
-.stats-strip{display:flex;gap:7px;margin-bottom:.9rem;}
-.stat{
-  flex:1;background:var(--surface2);
-  border:1px solid var(--border);
-  border-radius:var(--r-sm);
-  padding:9px 10px;text-align:center;
-}
+/* STATS */
+.stats{display:flex;gap:7px;margin-bottom:.9rem;}
+.stat{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:9px 10px;text-align:center;}
 .stat-val{font-size:17px;font-weight:600;font-family:var(--mono);}
 .stat-lbl{font-size:10px;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
 
-/* ── JSON TOOLBAR ── */
-.json-toolbar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
-.jtbtn{
-  background:var(--surface3);border:1px solid var(--border);
-  border-radius:var(--r-xs);color:var(--text2);
-  font-size:11px;padding:5px 9px;cursor:pointer;
-  font-family:var(--font);transition:all .15s;
-}
+/* JSON */
+.jtbar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
+.jtbtn{background:var(--surface3);border:1px solid var(--border);border-radius:var(--rxs);color:var(--text2);font-size:11px;padding:5px 9px;cursor:pointer;font-family:var(--font);transition:all .15s;}
 .jtbtn:hover{border-color:var(--border2);color:var(--text);}
-.json-status{
-  display:flex;align-items:center;gap:5px;
-  font-size:11px;margin-top:5px;color:var(--text3);min-height:16px;
-}
-.json-status.ok{color:var(--green);}
-.json-status.err{color:var(--red);}
+.jst{display:flex;align-items:center;gap:5px;font-size:11px;margin-top:5px;color:var(--text3);min-height:16px;}
+.jst.ok{color:var(--green);}.jst.err{color:var(--red);}
 .jsdot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
 
-/* ── TABS ── */
+/* TABS */
 .tab-row{display:flex;gap:4px;padding:7px 9px;border-bottom:1px solid var(--border);background:var(--surface2);}
-.tab{
-  flex:1;background:none;border:1px solid transparent;
-  border-radius:var(--r-xs);padding:5px 4px;
-  font-family:var(--font);font-size:11px;color:var(--text2);
-  cursor:pointer;text-align:center;transition:all .15s;
-}
+.tab{flex:1;background:none;border:1px solid transparent;border-radius:var(--rxs);padding:5px 4px;font-family:var(--font);font-size:11px;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;}
 .tab.active{background:var(--surface3);border-color:var(--border2);color:var(--text);}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
 
-/* ── SEND BUTTON ── */
-.send-btn{
-  width:100%;padding:13px;border:none;border-radius:var(--r);
-  font-size:14px;font-weight:600;font-family:var(--font);
-  cursor:pointer;overflow:hidden;
-  transition:opacity .2s,transform .1s;
-  background:linear-gradient(135deg,#00b300,#00e676);
-  color:#001800;letter-spacing:-.2px;
-  box-shadow:0 4px 18px rgba(0,230,118,.22);
-}
+/* SEND BTN */
+.send-btn{width:100%;padding:13px;border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;transition:opacity .2s,transform .1s;background:linear-gradient(135deg,#00b300,#00e676);color:#001800;box-shadow:0 4px 18px rgba(0,230,118,.22);}
 .send-btn:disabled{background:var(--surface3);color:var(--text3);box-shadow:none;cursor:not-allowed;}
 .send-btn:not(:disabled):active{transform:scale(.98);}
-.send-btn .sp{
-  display:none;width:16px;height:16px;
-  border:2px solid rgba(0,0,0,.25);border-top-color:#001800;
-  border-radius:50%;animation:spin .65s linear infinite;margin:0 auto;
-}
+.send-btn .sp{display:none;width:16px;height:16px;border:2px solid rgba(0,0,0,.25);border-top-color:#001800;border-radius:50%;animation:spin .65s linear infinite;margin:0 auto;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.send-btn.loading .btn-text{display:none;}
-.send-btn.loading .sp{display:block;}
+.send-btn.loading .btn-text{display:none;}.send-btn.loading .sp{display:block;}
 
-/* ── PROGRESS ── */
+/* PROGRESS */
 .prog-wrap{background:var(--surface3);border-radius:3px;height:3px;overflow:hidden;margin-bottom:8px;display:none;}
 .prog-bar{height:100%;width:0%;background:linear-gradient(90deg,#00b300,#00e676);border-radius:3px;transition:width .3s ease;}
 
-/* ── LOG ── */
-.log-wrap{
-  background:var(--surface3);border-radius:var(--r-sm);
-  border:1px solid var(--border);font-family:var(--mono);
-  font-size:11px;max-height:170px;overflow-y:auto;padding:7px 9px;
-}
+/* LOG */
+.log-wrap{background:var(--surface3);border-radius:var(--rsm);border:1px solid var(--border);font-family:var(--mono);font-size:11px;max-height:180px;overflow-y:auto;padding:7px 9px;}
 .log-row{padding:2px 0;display:flex;gap:7px;border-bottom:1px solid rgba(255,255,255,.025);}
 .log-row:last-child{border-bottom:none;}
-.log-t{color:var(--text3);flex-shrink:0;}
-.log-m{flex:1;word-break:break-all;line-height:1.5;}
+.lt{color:var(--text3);flex-shrink:0;}.lm{flex:1;word-break:break-all;line-height:1.5;}
 .ok{color:var(--green)}.er{color:var(--red)}.nf{color:var(--blue)}.wn{color:var(--amber)}
 
-/* ── CONFIG FIELDS (collapsed) ── */
-.cfg-toggle{
-  display:flex;align-items:center;gap:6px;
-  font-size:11px;color:var(--text2);cursor:pointer;
-  padding:.55rem 0;border:none;background:none;font-family:var(--font);
-  transition:color .15s;
-}
+/* HISTORY */
+.hist-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:11.5px;}
+.hist-row:last-child{border-bottom:none;}
+.hist-t{color:var(--text2);font-family:var(--mono);font-size:10.5px;min-width:80px;}
+.hist-a{flex:1;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-ok{color:var(--green);font-family:var(--mono);font-size:11px;}
+.hist-fail{color:var(--red);font-family:var(--mono);font-size:11px;}
+
+/* CONFIG TOGGLE */
+.cfg-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer;padding:.55rem 0;border:none;background:none;font-family:var(--font);transition:color .15s;}
 .cfg-toggle:hover{color:var(--text);}
 .cfg-toggle .arr{transition:transform .2s;display:inline-block;}
 .cfg-toggle.open .arr{transform:rotate(90deg);}
 .cfg-body{display:none;padding-top:.6rem;border-top:1px solid var(--border);margin-top:.5rem;}
 .cfg-body.open{display:block;}
 
-/* ── HISTORY TABLE ── */
-.hist-row{
-  display:flex;align-items:center;gap:8px;
-  padding:7px 0;border-bottom:1px solid var(--border);
-  font-size:11.5px;
-}
-.hist-row:last-child{border-bottom:none;}
-.hist-time{color:var(--text2);font-family:var(--mono);font-size:10.5px;min-width:80px;}
-.hist-alt{flex:1;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hist-ok{color:var(--green);font-family:var(--mono);font-size:11px;}
-.hist-fail{color:var(--red);font-family:var(--mono);font-size:11px;}
-
-/* ── SHIMMER (loading skeleton) ── */
-.shimmer{
-  background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);
-  background-size:200% 100%;
-  animation:shim 1.4s infinite;
-  border-radius:4px;height:14px;
-}
-@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* PHONE PREVIEW */
+.phone{background:#1a1a1a;border-radius:20px;overflow:hidden;border:1.5px solid var(--border2);max-width:320px;margin:0 auto;}
+.phone-bar{background:#111;padding:7px 14px 5px;display:flex;justify-content:space-between;align-items:center;}
+.phone-chat-hdr{background:#111820;padding:7px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06);}
+.phone-chat{background:#0a1620;padding:10px;min-height:80px;}
+.phone-input{background:#111820;padding:7px 10px;display:flex;gap:6px;border-top:1px solid rgba(255,255,255,.06);}
 </style>
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
+<!-- LOADING -->
 <div id="loadScreen">
   <div class="load-logo">💬</div>
   <div class="load-title">LINE Flex Broadcaster</div>
@@ -348,179 +158,136 @@ input[type=range]::-webkit-slider-thumb{
 </div>
 
 <!-- HEADER -->
-<div class="header">
+<div class="hdr">
   <div class="logo">💬</div>
-  <div class="header-text">
+  <div class="hdr-text">
     <h1>LINE Flex Broadcaster</h1>
-    <p id="hdrSub">ยังไม่ได้เชื่อมต่อ</p>
+    <p id="hdrSub">กำลังโหลด...</p>
   </div>
   <div class="hdr-right">
-    <div class="pill pill-amber" id="uidPill" onclick="refreshUIDs()">
+    <div class="pill pill-amber" id="uidPill">
       <div class="dot"></div>
-      <span id="uidPillTxt">—</span>
+      <span id="uidPillTxt">— UID</span>
     </div>
-    <div class="pill pill-green" id="statusPill" onclick="pingServer()">
+    <div class="pill pill-green" id="statusPill" onclick="ping()">
       <div class="dot"></div>
-      <span id="statusTxt">ตรวจสอบ</span>
+      <span id="statusTxt">Online</span>
     </div>
   </div>
 </div>
 
-<div class="container">
+<div class="wrap">
 
-  <!-- ── EXEC URL ── -->
-  <div class="exec-banner" onclick="document.getElementById('execUrlInp').focus()">
-    <span style="font-size:15px;flex-shrink:0;">🔗</span>
-    <input type="text" id="execUrlInp"
-      placeholder="https://script.google.com/macros/s/.../exec"
-      oninput="onExecChange()"
-      autocomplete="off" spellcheck="false">
-    <button class="exec-go" id="execGoBtn" onclick="loadConfig()" disabled>โหลด</button>
-  </div>
-
-  <!-- ── CONFIG (ดึงจาก GS) ── -->
+  <!-- CONFIG -->
   <div class="card" id="cfgCard">
     <div class="card-hdr">
-      <div class="cicon ci-blue">⚙️</div>
+      <div class="ci ci-blue">⚙️</div>
       <h2>การตั้งค่าระบบ</h2>
-      <span class="badge" id="cfgBadge">ยังไม่โหลด</span>
+      <span class="badge" id="cfgBadge">กำลังโหลด...</span>
     </div>
     <div class="card-body">
-
-      <!-- Token -->
       <div class="field">
         <label>Channel Access Token</label>
-        <div class="input-wrap">
-          <input type="password" id="cfgToken" placeholder="ดึงจาก Apps Script อัตโนมัติ / หรือพิมพ์เอง" autocomplete="off">
-          <button class="vis-btn" onclick="toggleVis('cfgToken',this)">👁</button>
+        <div class="iw">
+          <input type="password" id="cfgToken" placeholder="โหลดจาก Apps Script อัตโนมัติ" autocomplete="off">
+          <button class="vis" onclick="toggleVis('cfgToken',this)">👁</button>
         </div>
       </div>
-
-      <!-- Sheet -->
       <div class="row2">
         <div class="field">
           <label>Sheet Name</label>
-          <input type="text" id="cfgSheetName" placeholder="UserData">
+          <input type="text" id="cfgSheet" placeholder="UserData">
         </div>
         <div class="field">
           <label>UID Column</label>
-          <select id="cfgUidCol">
+          <select id="cfgCol">
             <option value="1">A</option><option value="2">B</option>
             <option value="3">C</option><option value="4">D</option>
           </select>
         </div>
       </div>
-
-      <!-- Advanced toggle -->
-      <button class="cfg-toggle" id="advToggle" onclick="toggleAdv()">
-        <span class="arr">▶</span> ตั้งค่าเพิ่มเติม
+      <button class="cfg-toggle" id="advBtn" onclick="toggleAdv()">
+        <span class="arr">▶</span> Exec URL / ตั้งค่าเพิ่มเติม
       </button>
       <div class="cfg-body" id="advBody">
         <div class="field">
-          <label>Sheet ID (แก้ไขในกรณีต้องการ override)</label>
-          <input type="text" id="cfgSheetId" placeholder="โหลดจาก Apps Script">
-          <p class="helper">ปกติไม่ต้องแก้ — Apps Script จัดการให้</p>
+          <label>Apps Script Exec URL</label>
+          <input type="text" id="cfgExec" placeholder="https://script.google.com/macros/s/.../exec"
+            oninput="execUrl=this.value.trim(); localStorage.setItem('execUrl',execUrl)">
+          <p class="helper">แก้ได้ตรงนี้ถ้าต้องการเปลี่ยน URL</p>
         </div>
         <div class="field">
-          <label>Header Rows (แถว Header ที่ข้ามไป)</label>
-          <input type="number" id="cfgHeaderRows" value="1" min="0" max="5" style="width:80px;">
+          <label>Header Rows</label>
+          <input type="number" id="cfgHdr" value="1" min="0" max="5" style="width:80px;">
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- ── RECIPIENTS ── -->
+  <!-- RECIPIENTS -->
   <div class="card">
     <div class="card-hdr">
-      <div class="cicon ci-amber">👥</div>
+      <div class="ci ci-amber">👥</div>
       <h2>จำนวนผู้รับ</h2>
       <span class="badge" id="totalBadge">UID: —</span>
     </div>
     <div class="card-body">
-
       <div class="field">
         <label>จำนวนที่จะส่ง (สุ่มจากทั้งหมด)</label>
-        <div class="slider-row">
-          <input type="range" id="cntSlider" min="1" max="500" value="150" step="1"
-            oninput="syncCount(this.value)">
-          <span class="slider-val" id="cntSliderVal">150</span>
+        <div class="srow">
+          <input type="range" id="cntSlider" min="1" max="500" value="150" step="1" oninput="syncCnt(this.value)">
+          <span class="sval" id="cntSliderVal">150</span>
         </div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:9px;">
-          <input type="number" id="cntNum" value="150" min="1" max="50000" style="width:90px;"
-            oninput="syncCountNum(this.value)">
+          <input type="number" id="cntNum" value="150" min="1" max="50000" style="width:90px;" oninput="syncCnt(this.value)">
           <span style="font-size:12px;color:var(--text2)">คน</span>
         </div>
       </div>
-
       <div class="field">
-        <label>Delay ระหว่างแต่ละ Message (ms)</label>
-        <div class="slider-row">
-          <input type="range" id="dlySlider" min="100" max="2000" value="200" step="100"
-            oninput="syncDelay(this.value)">
-          <span class="slider-val" id="dlyVal">200 ms</span>
+        <label>Delay ระหว่าง Message (ms)</label>
+        <div class="srow">
+          <input type="range" id="dlySlider" min="100" max="2000" value="200" step="100" oninput="syncDly(this.value)">
+          <span class="sval" id="dlyVal">200 ms</span>
         </div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:9px;">
-          <input type="number" id="dlyNum" value="200" min="100" max="10000" style="width:90px;"
-            oninput="syncDelay(this.value)">
-          <span style="font-size:12px;color:var(--text2)">มิลลิวินาที</span>
+          <input type="number" id="dlyNum" value="200" min="100" max="10000" style="width:90px;" oninput="syncDly(this.value)">
+          <span style="font-size:12px;color:var(--text2)">ms</span>
         </div>
       </div>
-
-      <div class="stats-strip">
-        <div class="stat">
-          <div class="stat-val" style="color:var(--blue)" id="sTarget">150</div>
-          <div class="stat-lbl">เป้าหมาย</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val" style="color:var(--amber)" id="sEst">~30s</div>
-          <div class="stat-lbl">ประมาณ</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val" style="color:var(--green)" id="sSent">0</div>
-          <div class="stat-lbl">ส่งแล้ว</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val" style="color:var(--red)" id="sFail">0</div>
-          <div class="stat-lbl">ผิดพลาด</div>
-        </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val" style="color:var(--blue)"  id="sTarget">150</div><div class="stat-lbl">เป้าหมาย</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--amber)" id="sEst">~30s</div><div class="stat-lbl">ประมาณ</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--green)" id="sSent">0</div><div class="stat-lbl">สำเร็จ</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--red)"   id="sFail">0</div><div class="stat-lbl">ผิดพลาด</div></div>
       </div>
-
     </div>
   </div>
 
-  <!-- ── FLEX JSON ── -->
+  <!-- JSON -->
   <div class="card">
     <div class="card-hdr">
-      <div class="cicon ci-green">📋</div>
+      <div class="ci ci-green">📋</div>
       <h2>Flex Message JSON</h2>
-      <span class="badge" id="jsonBytesBadge">0 B</span>
+      <span class="badge" id="jsonBytes">0 B</span>
     </div>
     <div class="tab-row">
       <button class="tab active" onclick="switchTab('raw',this)">📝 วาง JSON</button>
-      <button class="tab" onclick="switchTab('preview',this)">🎨 Preview</button>
+      <button class="tab" onclick="switchTab('preview',this)">📱 Preview</button>
     </div>
     <div class="card-body">
       <div id="tab-raw" class="tab-panel active">
         <div class="field" style="margin-bottom:.7rem;">
           <label>Alt Text (ข้อความแจ้งเตือน)</label>
-          <input type="text" id="altTextInp" placeholder="ข้อความที่แสดงในกล่องแจ้งเตือน LINE"
-            oninput="syncAltText()" maxlength="400">
-          <p class="helper">แสดงเมื่ออุปกรณ์ไม่รองรับ Flex — จะถูก sync เข้า JSON อัตโนมัติ</p>
+          <input type="text" id="altText" placeholder="ข้อความที่แสดงในกล่องแจ้งเตือน LINE" maxlength="400" oninput="syncAlt()">
         </div>
-        <div class="json-toolbar">
+        <div class="jtbar">
           <button class="jtbtn" onclick="fmtJson()">✨ Format</button>
           <button class="jtbtn" onclick="clearJson()">🗑 ล้าง</button>
           <button class="jtbtn" onclick="loadSample()">📎 ตัวอย่าง</button>
           <button class="jtbtn" onclick="copyJson()">📋 คัดลอก</button>
         </div>
-        <textarea id="jsonInp"
-          placeholder='วาง Flex Message JSON ที่นี่...'
-          oninput="onJsonInput()"></textarea>
-        <div class="json-status" id="jsSt">
-          <div class="jsdot"></div>
-          <span id="jsStTxt">รอ JSON...</span>
-        </div>
+        <textarea id="jsonInp" placeholder="วาง Flex Message JSON ที่นี่..." oninput="onJsonInput()"></textarea>
+        <div class="jst" id="jsSt"><div class="jsdot"></div><span id="jsStTxt">รอ JSON...</span></div>
       </div>
       <div id="tab-preview" class="tab-panel">
         <div id="previewArea"></div>
@@ -528,236 +295,167 @@ input[type=range]::-webkit-slider-thumb{
     </div>
   </div>
 
-  <!-- ── SEND ── -->
+  <!-- SEND -->
   <div class="card">
     <div class="card-hdr">
-      <div class="cicon ci-green">🚀</div>
+      <div class="ci ci-green">🚀</div>
       <h2>ส่ง Broadcast</h2>
     </div>
     <div class="card-body">
       <div class="prog-wrap" id="progWrap"><div class="prog-bar" id="progBar"></div></div>
-      <button class="send-btn" id="sendBtn" onclick="onSendClick()">
+      <button class="send-btn" id="sendBtn" onclick="onSend()">
         <span class="btn-text">📤 ส่ง Flex Message</span>
         <div class="sp"></div>
       </button>
       <div style="height:10px;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px;">
         <span style="font-size:11.5px;color:var(--text2);">📋 Log</span>
         <span style="font-size:11px;color:var(--red);cursor:pointer;" onclick="clearLog()">ล้าง</span>
       </div>
       <div class="log-wrap" id="logArea">
-        <div class="log-row"><span class="log-t">--:--</span><span class="log-m nf">ยังไม่ได้เชื่อมต่อ — ใส่ Exec URL แล้วกด "โหลด"</span></div>
+        <div class="log-row"><span class="lt">--:--</span><span class="lm nf">กำลังโหลดการตั้งค่า...</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ── HISTORY ── -->
-  <div class="card" id="histCard">
+  <!-- HISTORY -->
+  <div class="card">
     <div class="card-hdr">
-      <div class="cicon ci-purple">📊</div>
+      <div class="ci ci-purple">📊</div>
       <h2>ประวัติการส่ง</h2>
-      <span class="badge" id="histBadge" style="cursor:pointer;" onclick="loadHistory()">🔄 รีเฟรช</span>
+      <span class="badge" style="cursor:pointer;" onclick="loadHistory()">🔄 รีเฟรช</span>
     </div>
     <div class="card-body" id="histBody">
-      <div class="shimmer" style="margin-bottom:8px;"></div>
-      <div class="shimmer" style="width:70%;"></div>
+      <p style="font-size:12px;color:var(--text3);text-align:center;padding:.5rem 0;">กำลังโหลด...</p>
     </div>
   </div>
 
-</div><!-- /container -->
+</div>
 
 <script>
-// ──────────────────────────────────
-//  STATE
-// ──────────────────────────────────
-let execUrl = '';
-let cfg = {};          // config จาก GS
-let isSending = false;
-let abortSend = false;
+// ══════════════════════════════════════
+//  ★ แก้ตรงนี้อย่างเดียว ★
+// ══════════════════════════════════════
+const EXEC_URL = 'https://script.google.com/macros/s/AKfycbxaYjYJRZhtCgZDH53fDgoh-mP7B-E1y17g_xKtJc3zFXXf58iuyw3f7ZbnITGGzZ_vXw/exec';
+// ══════════════════════════════════════
+
+let execUrl = localStorage.getItem('execUrl') || EXEC_URL;
+let isSending = false, abortSend = false;
 let sentOk = 0, sentFail = 0;
 
 const Toast = Swal.mixin({
-  toast:true,position:'top',showConfirmButton:false,
-  timer:3000,timerProgressBar:true,
-  background:'#1f1f25',color:'#f0f0f2',
+  toast:true, position:'top', showConfirmButton:false,
+  timer:3000, timerProgressBar:true,
+  background:'#1f1f25', color:'#f0f0f2',
 });
 
-// ──────────────────────────────────
-//  BOOT — โหลด execUrl จาก localStorage แล้วดึง config
-// ──────────────────────────────────
+// ── BOOT ──────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  setLoadMsg('กำลังตรวจสอบ URL ที่บันทึกไว้...', 20);
-  const saved = localStorage.getItem('execUrl') || '';
-  if (saved) {
-    document.getElementById('execUrlInp').value = saved;
-    execUrl = saved;
-    document.getElementById('execGoBtn').disabled = false;
-    setLoadMsg('พบ URL ที่บันทึกไว้ — กำลังโหลด config...', 50);
-    await loadConfig(true);
-  } else {
-    setLoadMsg('ใส่ Apps Script Exec URL เพื่อเริ่มต้น', 100);
-    hideLoadScreen();
-  }
+  document.getElementById('cfgExec').value = execUrl;
+  setLoad('กำลังดึงการตั้งค่าจาก Apps Script...', 30);
+  await loadConfig();
 });
 
-function setLoadMsg(msg, pct) {
+function setLoad(msg, pct) {
   document.getElementById('loadMsg').textContent = msg;
   document.getElementById('loadBar').style.width = pct + '%';
 }
-
-function hideLoadScreen() {
+function hideLoad() {
   const s = document.getElementById('loadScreen');
   s.classList.add('hide');
   setTimeout(() => s.style.display = 'none', 450);
 }
 
-// ──────────────────────────────────
-//  EXEC URL CHANGE
-// ──────────────────────────────────
-function onExecChange() {
-  const val = document.getElementById('execUrlInp').value.trim();
-  document.getElementById('execGoBtn').disabled = !val;
-  execUrl = val;
-}
-
-// ──────────────────────────────────
-//  LOAD CONFIG จาก GS
-// ──────────────────────────────────
-async function loadConfig(silent = false) {
-  execUrl = document.getElementById('execUrlInp').value.trim();
-  if (!execUrl) return Toast.fire({ icon:'warning', title:'ใส่ Exec URL ก่อน' });
-
-  localStorage.setItem('execUrl', execUrl);
-  if (!silent) setLoadMsg('กำลังดึง config...', 60);
-
+// ── LOAD CONFIG ───────────────────────
+async function loadConfig() {
   try {
-    const url = execUrl + '?action=getConfig';
-    const res = await fetchWithTimeout(url, {}, 12000);
+    setLoad('กำลังดึงการตั้งค่า...', 40);
+    const res  = await ft(execUrl + '?action=getConfig', {}, 15000);
     const data = await res.json();
 
     if (data.ok && data.config) {
-      cfg = data.config;
-      applyConfig(cfg);
+      const c = data.config;
+      if (c.token)     document.getElementById('cfgToken').value = c.token;
+      if (c.sheetName) document.getElementById('cfgSheet').value = c.sheetName;
+      if (c.uidColumn) document.getElementById('cfgCol').value   = String(c.uidColumn);
+      if (c.headerRows !== undefined) document.getElementById('cfgHdr').value = c.headerRows;
+
       document.getElementById('cfgBadge').textContent = '✓ โหลดแล้ว';
-      document.getElementById('hdrSub').textContent = cfg.botName || 'เชื่อมต่อแล้ว';
-      addLog(`✓ โหลด config สำเร็จ — Bot: ${cfg.botName || '?'}`, 'ok');
-      if (!silent) Toast.fire({ icon:'success', title:'โหลด config สำเร็จ' });
+      document.getElementById('hdrSub').textContent   = c.botName || 'เชื่อมต่อแล้ว';
+
+      if (c.totalUIDs) {
+        document.getElementById('uidPillTxt').textContent = c.totalUIDs.toLocaleString() + ' UID';
+        document.getElementById('totalBadge').textContent = 'UID: ' + c.totalUIDs.toLocaleString();
+        document.getElementById('cntSlider').max = Math.min(c.totalUIDs, 99999);
+      }
+      addLog('✓ โหลดการตั้งค่าสำเร็จ — ' + (c.botName || ''), 'ok');
     } else {
-      // GS ตอบกลับแต่ไม่มี config (เช่น action ไม่รองรับ)
-      addLog('⚠ GS ไม่ส่ง config — กรอกข้อมูลด้วยตนเอง', 'wn');
       document.getElementById('cfgBadge').textContent = '⚠ ไม่มี config';
-      if (!silent) Toast.fire({ icon:'warning', title:'GS ไม่มี getConfig endpoint', text:'กรอกค่าด้วยตนเอง' });
+      addLog('⚠ GS ไม่ตอบ config — กรอกค่าด้วยตนเอง', 'wn');
     }
 
-    // โหลด stats & history
-    setLoadMsg('กำลังดึงข้อมูล UID...', 80);
-    await refreshUIDs();
-    setLoadMsg('โหลดประวัติ...', 90);
+    setLoad('กำลังโหลดประวัติ...', 80);
     await loadHistory();
-
-    setLoadMsg('พร้อมใช้งาน', 100);
-    setTimeout(hideLoadScreen, 400);
+    setLoad('พร้อมใช้งาน', 100);
+    setTimeout(hideLoad, 400);
 
   } catch (err) {
-    addLog('❌ เชื่อมต่อไม่ได้: ' + err.message, 'er');
+    addLog('❌ โหลดไม่สำเร็จ: ' + err.message, 'er');
     document.getElementById('cfgBadge').textContent = '❌ เชื่อมต่อไม่ได้';
-    if (!silent) Toast.fire({ icon:'error', title:'เชื่อมต่อไม่ได้', text:err.message });
-    setLoadMsg('เชื่อมต่อไม่สำเร็จ', 100);
-    setTimeout(hideLoadScreen, 600);
+    document.getElementById('hdrSub').textContent   = 'เชื่อมต่อไม่ได้';
+    setLoad('เชื่อมต่อไม่สำเร็จ — ตรวจสอบ EXEC_URL', 100);
+    setTimeout(hideLoad, 800);
   }
 }
 
-function applyConfig(c) {
-  if (c.token)       document.getElementById('cfgToken').value = c.token;
-  if (c.sheetName)   document.getElementById('cfgSheetName').value = c.sheetName;
-  if (c.sheetId)     document.getElementById('cfgSheetId').value = c.sheetId;
-  if (c.uidColumn)   document.getElementById('cfgUidCol').value = String(c.uidColumn);
-  if (c.headerRows !== undefined) document.getElementById('cfgHeaderRows').value = c.headerRows;
-}
-
-// ──────────────────────────────────
-//  PING
-// ──────────────────────────────────
-async function pingServer() {
-  if (!execUrl) return Toast.fire({ icon:'warning', title:'ใส่ Exec URL ก่อน' });
-  document.getElementById('statusTxt').textContent = '...';
+// ── PING ──────────────────────────────
+async function ping() {
   try {
-    const res = await fetchWithTimeout(execUrl + '?action=ping', {}, 8000);
-    const d = await res.json();
-    if (d.ok) {
-      document.getElementById('statusTxt').textContent = 'Online';
-      document.getElementById('statusPill').className = 'pill pill-green';
-      Toast.fire({ icon:'success', title:'เชื่อมต่อได้', text: d.time || '' });
-    } else throw new Error(d.message);
+    const d = await (await ft(execUrl + '?action=ping', {}, 8000)).json();
+    document.getElementById('statusTxt').textContent = d.ok ? 'Online' : 'Error';
+    document.getElementById('statusPill').className  = 'pill ' + (d.ok ? 'pill-green' : 'pill-red');
+    Toast.fire({ icon: d.ok ? 'success' : 'error', title: d.ok ? 'เชื่อมต่อได้' : 'Error' });
   } catch (e) {
     document.getElementById('statusTxt').textContent = 'Offline';
-    document.getElementById('statusPill').className = 'pill pill-red';
-    Toast.fire({ icon:'error', title:'เชื่อมต่อไม่ได้', text: e.message });
+    document.getElementById('statusPill').className  = 'pill pill-red';
   }
 }
 
-// ──────────────────────────────────
-//  REFRESH UIDs COUNT
-// ──────────────────────────────────
-async function refreshUIDs() {
-  if (!execUrl) return;
-  try {
-    const sheet = document.getElementById('cfgSheetName').value.trim() || 'UserData';
-    const res = await fetchWithTimeout(execUrl + `?action=getStats&sheet=${encodeURIComponent(sheet)}`, {}, 10000);
-    const d = await res.json();
-    if (d.ok) {
-      document.getElementById('uidPillTxt').textContent = `${Number(d.totalUIDs).toLocaleString()} UID`;
-      document.getElementById('totalBadge').textContent = `UID: ${Number(d.totalUIDs).toLocaleString()}`;
-      // ปรับ max slider
-      const max = Math.min(Math.max(d.totalUIDs, 10), 99999);
-      document.getElementById('cntSlider').max = max;
-    }
-  } catch (_) {}
-}
-
-// ──────────────────────────────────
-//  HISTORY
-// ──────────────────────────────────
+// ── HISTORY ───────────────────────────
 async function loadHistory() {
-  if (!execUrl) return;
   const body = document.getElementById('histBody');
   try {
-    const res = await fetchWithTimeout(execUrl + '?action=getLogs&limit=15', {}, 10000);
-    const d = await res.json();
+    const d = await (await ft(execUrl + '?action=getLogs&limit=15', {}, 10000)).json();
     if (d.ok && d.logs && d.logs.length > 0) {
-      document.getElementById('histBadge').textContent = `${d.logs.length} รายการ`;
-      body.innerHTML = d.logs.map(l => `
-        <div class="hist-row">
-          <span class="hist-time">${l.timestamp}</span>
-          <span class="hist-alt" title="${l.altText}">${l.altText}</span>
+      body.innerHTML = d.logs.map(l =>
+        `<div class="hist-row">
+          <span class="hist-t">${l.timestamp}</span>
+          <span class="hist-a" title="${esc(l.altText)}">${esc(l.altText)}</span>
           <span class="hist-ok">✓${l.sentOk}</span>
           <span class="hist-fail">✗${l.sentFail}</span>
-        </div>`).join('');
+        </div>`
+      ).join('');
     } else {
-      body.innerHTML = '<p style="font-size:12px;color:var(--text3);text-align:center;padding:1rem 0;">ยังไม่มีประวัติการส่ง</p>';
-      document.getElementById('histBadge').textContent = '—';
+      body.innerHTML = '<p style="font-size:12px;color:var(--text3);text-align:center;padding:.5rem 0;">ยังไม่มีประวัติ</p>';
     }
   } catch (_) {
-    body.innerHTML = '<p style="font-size:12px;color:var(--text3);text-align:center;padding:1rem 0;">โหลดไม่ได้</p>';
+    body.innerHTML = '<p style="font-size:12px;color:var(--text3);text-align:center;padding:.5rem 0;">โหลดไม่ได้</p>';
   }
 }
 
-// ──────────────────────────────────
-//  COUNT / DELAY SYNC
-// ──────────────────────────────────
-function syncCount(v) {
+// ── SLIDERS ───────────────────────────
+function syncCnt(v) {
   v = parseInt(v) || 1;
-  document.getElementById('cntSlider').value = Math.min(v, 500);
-  document.getElementById('cntNum').value = v;
+  document.getElementById('cntSlider').value  = Math.min(v, 500);
+  document.getElementById('cntNum').value     = v;
   document.getElementById('cntSliderVal').textContent = v;
   document.getElementById('sTarget').textContent = v.toLocaleString();
   updateEst();
 }
-function syncCountNum(v) { syncCount(v); }
-function syncDelay(v) {
+function syncDly(v) {
   v = parseInt(v) || 200;
   document.getElementById('dlySlider').value = Math.min(v, 2000);
-  document.getElementById('dlyNum').value = v;
+  document.getElementById('dlyNum').value    = v;
   document.getElementById('dlyVal').textContent = v + ' ms';
   updateEst();
 }
@@ -765,61 +463,40 @@ function updateEst() {
   const n = parseInt(document.getElementById('cntNum').value) || 0;
   const d = parseInt(document.getElementById('dlyNum').value) || 200;
   const s = Math.round(n * d / 1000);
-  document.getElementById('sEst').textContent = s < 60 ? `~${s}s` : `~${Math.round(s/60)}m`;
+  document.getElementById('sEst').textContent = s < 60 ? '~' + s + 's' : '~' + Math.round(s/60) + 'm';
 }
+document.getElementById('cntSlider').addEventListener('input', e => syncCnt(e.target.value));
+document.getElementById('dlySlider').addEventListener('input', e => syncDly(e.target.value));
 
-// ──────────────────────────────────
-//  JSON
-// ──────────────────────────────────
+// ── JSON ──────────────────────────────
 function validateJson() {
   const raw = document.getElementById('jsonInp').value.trim();
-  const st = document.getElementById('jsSt');
+  const st  = document.getElementById('jsSt');
   const stTxt = document.getElementById('jsStTxt');
-  const badge = document.getElementById('jsonBytesBadge');
-  if (!raw) { st.className='json-status'; stTxt.textContent='รอ JSON...'; badge.textContent='0 B'; return false; }
+  const badge = document.getElementById('jsonBytes');
+  if (!raw) { st.className='jst'; stTxt.textContent='รอ JSON...'; badge.textContent='0 B'; return false; }
   try {
     const p = JSON.parse(raw);
     const b = new Blob([raw]).size;
-    badge.textContent = b > 1024 ? `${(b/1024).toFixed(1)} KB` : `${b} B`;
-    st.className = 'json-status ok';
-    stTxt.textContent = `✓ ถูกต้อง — type: "${p.type || '?'}"`;
+    badge.textContent = b > 1024 ? (b/1024).toFixed(1)+' KB' : b+' B';
+    st.className = 'jst ok';
+    stTxt.textContent = '✓ ถูกต้อง — type:"' + (p.type||'?') + '" contents:' + (p.contents ? '✓' : '✗');
     return true;
   } catch(e) {
-    st.className = 'json-status err';
+    st.className = 'jst err';
     stTxt.textContent = '✗ ' + e.message;
     badge.textContent = '—';
     return false;
   }
 }
-function fmtJson() {
-  const ta = document.getElementById('jsonInp');
-  try { ta.value = JSON.stringify(JSON.parse(ta.value), null, 2); onJsonInput(); Toast.fire({icon:'success',title:'จัด Format แล้ว'}); }
-  catch(e) { Toast.fire({icon:'error',title:'JSON ผิดพลาด',text:e.message}); }
-}
-function clearJson() { document.getElementById('jsonInp').value=''; validateJson(); }
-function copyJson() {
-  const v = document.getElementById('jsonInp').value;
-  if (!v) return Toast.fire({icon:'warning',title:'ไม่มีข้อมูล'});
-  navigator.clipboard.writeText(v).then(()=>Toast.fire({icon:'success',title:'คัดลอกแล้ว'}));
-}
-function loadSample() {
-  const s = {"type":"flex","altText":"ทดสอบ LINE Broadcaster","contents":{"type":"bubble","body":{"type":"box","layout":"vertical","contents":[{"type":"text","text":"📣 ทดสอบระบบ","weight":"bold","size":"lg"},{"type":"text","text":"ส่งผ่าน LINE Flex Broadcaster","size":"sm","color":"#888888"}]},"footer":{"type":"box","layout":"horizontal","contents":[{"type":"button","style":"primary","action":{"type":"message","label":"ตอบรับ","text":"ตอบรับแล้ว"}}]}}};
-  document.getElementById('jsonInp').value = JSON.stringify(s, null, 2);
-  onJsonInput();
-  Toast.fire({icon:'info',title:'โหลดตัวอย่างแล้ว'});
-}
 
-// ──────────────────────────────────
-//  ALT TEXT SYNC
-// ──────────────────────────────────
-function syncAltText() {
-  // sync altText input → JSON textarea
-  const altVal = document.getElementById('altTextInp').value;
-  const ta = document.getElementById('jsonInp');
+function syncAlt() {
+  const val = document.getElementById('altText').value;
+  const ta  = document.getElementById('jsonInp');
   if (!ta.value.trim()) return;
   try {
     const obj = JSON.parse(ta.value);
-    obj.altText = altVal;
+    obj.altText = val;
     ta.value = JSON.stringify(obj, null, 2);
     validateJson();
   } catch(_) {}
@@ -827,19 +504,45 @@ function syncAltText() {
 
 function onJsonInput() {
   validateJson();
-  // sync JSON altText → input field
   try {
     const obj = JSON.parse(document.getElementById('jsonInp').value);
     if (obj.altText !== undefined) {
-      const inp = document.getElementById('altTextInp');
+      const inp = document.getElementById('altText');
       if (inp.value !== obj.altText) inp.value = obj.altText;
     }
   } catch(_) {}
 }
 
-// ──────────────────────────────────
-//  TABS
-// ──────────────────────────────────
+function fmtJson() {
+  const ta = document.getElementById('jsonInp');
+  try { ta.value = JSON.stringify(JSON.parse(ta.value), null, 2); onJsonInput(); Toast.fire({icon:'success',title:'Format เรียบร้อย'}); }
+  catch(e) { Toast.fire({icon:'error',title:'JSON ผิด',text:e.message}); }
+}
+function clearJson() { document.getElementById('jsonInp').value=''; document.getElementById('altText').value=''; validateJson(); }
+function copyJson() {
+  const v = document.getElementById('jsonInp').value;
+  if (!v) return Toast.fire({icon:'warning',title:'ไม่มีข้อมูล'});
+  navigator.clipboard.writeText(v).then(()=>Toast.fire({icon:'success',title:'คัดลอกแล้ว'}));
+}
+function loadSample() {
+  const s = {
+    type:'flex', altText:'ทดสอบ LINE Broadcaster',
+    contents:{type:'bubble',
+      body:{type:'box',layout:'vertical',contents:[
+        {type:'text',text:'📣 ทดสอบระบบ',weight:'bold',size:'lg'},
+        {type:'text',text:'ส่งผ่าน LINE Flex Broadcaster',size:'sm',color:'#888888'},
+      ]},
+      footer:{type:'box',layout:'horizontal',contents:[
+        {type:'button',style:'primary',action:{type:'message',label:'ตอบรับ',text:'ตอบรับแล้ว'}},
+      ]},
+    },
+  };
+  document.getElementById('jsonInp').value = JSON.stringify(s, null, 2);
+  onJsonInput();
+  Toast.fire({icon:'info',title:'โหลดตัวอย่างแล้ว'});
+}
+
+// ── TABS ──────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -851,231 +554,126 @@ function switchTab(name, btn) {
 function renderPreview() {
   const area = document.getElementById('previewArea');
   let parsed;
-  try {
-    parsed = JSON.parse(document.getElementById('jsonInp').value);
-  } catch(e) {
-    area.innerHTML = `<div style="padding:1.5rem;text-align:center;font-size:12px;color:var(--red);">✗ JSON ไม่ถูกต้อง: ${e.message}</div>`;
-    return;
-  }
+  try { parsed = JSON.parse(document.getElementById('jsonInp').value); }
+  catch(e) { area.innerHTML='<div style="padding:1rem;font-size:12px;color:var(--red);">✗ JSON ผิด: '+e.message+'</div>'; return; }
 
-  const contents = parsed.contents || parsed;
-
-  // สร้าง mock bubble preview ด้วย LINE Flex Simulator URL
-  const encoded = encodeURIComponent(JSON.stringify(contents));
-  const simUrl = `https://developers.line.biz/flex-simulator/?mode=compact`;
-
-  // Render visual preview แบบ native ด้วย HTML
+  const alt = parsed.altText || '(ไม่มี altText)';
   area.innerHTML = '';
 
-  // แสดง altText
-  const alt = parsed.altText || '(ไม่มี altText)';
-  const altBadge = document.createElement('div');
-  altBadge.style.cssText = 'font-size:11px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px;';
-  altBadge.innerHTML = `<span style="background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-family:var(--mono);">altText: ${escHtml(alt)}</span>`;
-  area.appendChild(altBadge);
+  const altEl = document.createElement('div');
+  altEl.style.cssText = 'font-size:11px;color:var(--text2);margin-bottom:10px;';
+  altEl.innerHTML = '<span style="background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-family:var(--mono);">altText: '+esc(alt)+'</span>';
+  area.appendChild(altEl);
 
-  // Phone frame wrapper
-  const frame = document.createElement('div');
-  frame.style.cssText = `
-    background:#1a1a1a;border-radius:20px;overflow:hidden;
-    border:1.5px solid var(--border2);
-    max-width:340px;margin:0 auto;
-  `;
+  const phone = document.createElement('div');
+  phone.className = 'phone';
+  phone.innerHTML =
+    '<div class="phone-bar"><span style="font-size:10px;color:#888;font-family:var(--mono);">LINE</span><div style="width:40px;height:3px;background:#333;border-radius:2px;"></div><span style="font-size:10px;color:#888;">🔋</span></div>'+
+    '<div class="phone-chat-hdr"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00c300,#00e676);display:flex;align-items:center;justify-content:center;font-size:12px;">🤖</div><span style="font-size:12px;font-weight:600;color:#eee;">Bot</span></div>'+
+    '<div class="phone-chat" id="bubbleRender"></div>'+
+    '<div class="phone-input"><div style="flex:1;background:#1f2a35;border-radius:20px;height:30px;"></div><div style="width:30px;height:30px;border-radius:50%;background:var(--gdim);display:flex;align-items:center;justify-content:center;font-size:13px;">📷</div></div>';
+  area.appendChild(phone);
 
-  // Status bar mock
-  frame.innerHTML = `
-    <div style="background:#111;padding:8px 14px 6px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:10px;color:#888;font-family:var(--mono);">LINE</span>
-      <div style="width:40px;height:4px;background:#333;border-radius:2px;"></div>
-      <span style="font-size:10px;color:#888;">🔋</span>
-    </div>
-    <div style="background:#111820;padding:8px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
-      <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#00c300,#00e676);display:flex;align-items:center;justify-content:center;font-size:13px;">🤖</div>
-      <span style="font-size:12px;font-weight:600;color:#eee;">Bot</span>
-    </div>
-    <div style="background:#0a1620;padding:12px 10px;min-height:100px;" id="bubbleRender"></div>
-    <div style="background:#111820;padding:8px 10px;display:flex;gap:6px;border-top:1px solid rgba(255,255,255,0.06);">
-      <div style="flex:1;background:#1f2a35;border-radius:20px;height:32px;"></div>
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:14px;">📷</div>
-    </div>
-  `;
-  area.appendChild(frame);
+  try { phone.querySelector('#bubbleRender').appendChild(buildBubble(parsed.contents || parsed)); }
+  catch(e) { phone.querySelector('#bubbleRender').innerHTML='<div style="font-size:11px;color:var(--red);padding:8px;">Render error: '+e.message+'</div>'; }
 
-  // เรนเดอร์ bubble ใน chat
-  const bubbleWrap = frame.querySelector('#bubbleRender');
-  try {
-    bubbleWrap.appendChild(buildBubble(contents));
-  } catch(e) {
-    bubbleWrap.innerHTML = `<div style="font-size:11px;color:var(--red);">Render error: ${e.message}</div>`;
-  }
-
-  // ลิงก์ไปเปิดใน Flex Simulator
-  const link = document.createElement('div');
-  link.style.cssText = 'margin-top:10px;text-align:center;';
-  link.innerHTML = `<a href="${simUrl}" target="_blank"
-    style="font-size:11px;color:var(--blue);text-decoration:none;
-    background:var(--blue-dim);border:1px solid rgba(77,166,255,.25);
-    border-radius:6px;padding:5px 12px;display:inline-block;">
-    🔗 เปิดใน LINE Flex Simulator
-  </a>`;
-  area.appendChild(link);
+  const linkEl = document.createElement('div');
+  linkEl.style.cssText = 'margin-top:10px;text-align:center;';
+  linkEl.innerHTML = '<a href="https://developers.line.biz/flex-simulator/" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:none;background:var(--bdim);border:1px solid rgba(77,166,255,.25);border-radius:6px;padding:5px 12px;display:inline-block;">🔗 เปิดใน Flex Simulator</a>';
+  area.appendChild(linkEl);
 }
 
-// ──────────────────────────────────
-//  BUBBLE RENDERER
-// ──────────────────────────────────
-function buildBubble(contents) {
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'border-radius:12px;overflow:hidden;background:#fff;max-width:300px;font-family:sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.4);';
-
-  const type = contents.type || 'bubble';
-
-  if (type === 'bubble') {
-    if (contents.hero)  wrap.appendChild(renderHero(contents.hero));
-    if (contents.header) wrap.appendChild(renderBox(contents.header, { background: contents.styles?.header?.backgroundColor || '#fff', padding: '12px' }));
-    if (contents.body)  wrap.appendChild(renderBox(contents.body,  { background: contents.styles?.body?.backgroundColor  || '#fff', padding: '12px' }));
-    if (contents.footer) wrap.appendChild(renderBox(contents.footer, { background: contents.styles?.footer?.backgroundColor || '#f5f5f5', padding: '8px' }));
-  } else if (type === 'carousel') {
-    wrap.style.cssText = 'display:flex;gap:8px;overflow-x:auto;padding:4px 0;max-width:100%;';
-    (contents.contents || []).forEach(c => {
-      const mini = buildBubble(c);
-      mini.style.flexShrink = '0';
-      mini.style.width = '240px';
-      wrap.appendChild(mini);
-    });
+function buildBubble(c) {
+  const w = document.createElement('div');
+  w.style.cssText = 'border-radius:12px;overflow:hidden;background:#fff;max-width:290px;font-family:sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.4);';
+  if (!c) return w;
+  if (c.type === 'carousel') {
+    w.style.cssText = 'display:flex;gap:8px;overflow-x:auto;padding:2px;max-width:100%;';
+    (c.contents||[]).forEach(b => { const m=buildBubble(b); m.style.flexShrink='0'; m.style.width='240px'; w.appendChild(m); });
+    return w;
   }
-  return wrap;
+  if (c.hero)   w.appendChild(renderHero(c.hero));
+  if (c.header) w.appendChild(renderBox(c.header, c.styles&&c.styles.header&&c.styles.header.backgroundColor||'#fff'));
+  if (c.body)   w.appendChild(renderBox(c.body,   c.styles&&c.styles.body&&c.styles.body.backgroundColor    ||'#fff'));
+  if (c.footer) w.appendChild(renderBox(c.footer, c.styles&&c.styles.footer&&c.styles.footer.backgroundColor||'#f5f5f5'));
+  return w;
 }
-
-function renderHero(hero) {
-  const div = document.createElement('div');
-  if (hero.type === 'image') {
+function renderHero(h) {
+  const d = document.createElement('div');
+  if (h.type==='image') {
     const img = document.createElement('img');
-    img.src = hero.url || '';
-    img.style.cssText = 'width:100%;display:block;object-fit:cover;';
-    const ratio = hero.aspectRatio || '20:13';
-    const [w, h] = ratio.split(':').map(Number);
-    img.style.aspectRatio = `${w}/${h}`;
-    img.onerror = () => { div.style.background='#e0e0e0'; div.style.height='160px'; img.style.display='none'; };
-    div.appendChild(img);
+    img.src = h.url||'';
+    const [pw,ph] = (h.aspectRatio||'20:13').split(':').map(Number);
+    img.style.cssText = 'width:100%;display:block;object-fit:'+(h.aspectMode||'cover')+';aspect-ratio:'+pw+'/'+ph+';';
+    img.onerror = ()=>{ d.style.cssText='background:#e0e0e0;height:140px;'; img.remove(); };
+    d.appendChild(img);
   }
-  return div;
+  return d;
 }
-
-function renderBox(box, styles = {}) {
-  const div = document.createElement('div');
-  div.style.cssText = `background:${styles.background||'#fff'};padding:${styles.padding||'12px'};`;
-
-  const layout = box.layout || 'vertical';
-  if (layout === 'horizontal' || layout === 'baseline') {
-    div.style.display = 'flex';
-    div.style.gap = '6px';
-    div.style.alignItems = layout === 'baseline' ? 'baseline' : 'center';
-  } else {
-    div.style.display = 'flex';
-    div.style.flexDirection = 'column';
-    div.style.gap = gapPx(box.spacing);
-  }
-
-  (box.contents || []).forEach(c => {
-    const el = renderComponent(c, box);
-    if (el) div.appendChild(el);
-  });
-  return div;
+function renderBox(box, bg) {
+  const d = document.createElement('div');
+  const lay = box.layout||'vertical';
+  d.style.cssText = 'background:'+(bg||'#fff')+';padding:10px;display:flex;flex-direction:'+(lay==='horizontal'||lay==='baseline'?'row':'column')+';gap:'+gapPx(box.spacing)+';'+(lay==='baseline'?'align-items:baseline;':'');
+  (box.contents||[]).forEach(c => { const el=renderComp(c); if(el) d.appendChild(el); });
+  return d;
 }
-
-function renderComponent(c, parent) {
+function renderComp(c) {
   if (!c) return null;
-  switch (c.type) {
-    case 'text': return renderText(c);
-    case 'button': return renderButton(c);
-    case 'image': return renderImage(c);
-    case 'box': return renderBox(c, { background: c.backgroundColor || '' });
+  switch(c.type) {
+    case 'text': {
+      const el = document.createElement('div');
+      el.style.cssText = 'font-size:'+szPx(c.size)+';color:'+(c.color||'#111')+';font-weight:'+(c.weight==='bold'?'700':'400')+';'+(c.wrap?'white-space:pre-wrap;word-break:break-word;':'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;')+(c.align?'text-align:'+c.align+';':'')+(c.flex?'flex:'+c.flex+';':'')+(c.margin?'margin-top:'+gapPx(c.margin)+';':'');
+      el.textContent = c.text||'';
+      return el;
+    }
+    case 'button': {
+      const b = document.createElement('button');
+      const isPrimary = c.style==='primary';
+      const col = c.color||(isPrimary?'#00b300':'#888');
+      b.style.cssText = 'width:100%;padding:9px;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:default;background:'+(isPrimary||c.style==='link'?col:'#f0f0f0')+';color:'+(isPrimary?'#fff':(c.style==='link'?col:'#333'))+';'+(c.flex?'flex:'+c.flex+';':'')+(c.margin?'margin-top:'+gapPx(c.margin)+';':'');
+      b.textContent = (c.action&&c.action.label)||'';
+      return b;
+    }
+    case 'image': {
+      return renderHero(c);
+    }
+    case 'box': return renderBox(c, c.backgroundColor||'');
     case 'separator': {
       const hr = document.createElement('hr');
-      hr.style.cssText = `border:none;border-top:1px solid ${c.color||'#e0e0e0'};margin:${gapPx(c.margin)} 0;`;
+      hr.style.cssText = 'border:none;border-top:1px solid '+(c.color||'#e0e0e0')+';margin:'+(gapPx(c.margin)||'4px')+' 0;';
       return hr;
     }
     case 'spacer': {
       const s = document.createElement('div');
-      s.style.height = sizeMap(c.size) || '8px';
+      s.style.height = szPx(c.size)||'8px';
       return s;
     }
     default: return null;
   }
 }
+function szPx(s) { return {xxs:'10px',xs:'11px',sm:'13px',md:'14px',lg:'17px',xl:'20px',xxl:'24px','3xl':'28px','4xl':'32px','5xl':'40px'}[s]||'14px'; }
+function gapPx(s) { return {none:'0',xs:'4px',sm:'6px',md:'10px',lg:'16px',xl:'24px',xxl:'32px'}[s]||'8px'; }
 
-function renderText(c) {
-  const el = document.createElement(c.weight === 'bold' ? 'b' : 'span');
-  el.style.cssText = `
-    display:block;
-    font-size:${sizeMap(c.size)};
-    color:${c.color||'#111'};
-    font-weight:${c.weight==='bold'?'700':'400'};
-    ${c.wrap?'white-space:pre-wrap;word-break:break-word;':'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'}
-    ${c.align?`text-align:${c.align};`:''}
-    ${c.margin?`margin-top:${gapPx(c.margin)};`:''}
-    ${c.flex?`flex:${c.flex};`:''}
-  `;
-  el.textContent = c.text || '';
-  return el;
-}
-
-function renderButton(c) {
-  const btn = document.createElement('button');
-  const style = c.style || 'secondary';
-  const color = c.color || (style === 'primary' ? '#00b300' : '#888');
-  btn.style.cssText = `
-    width:100%;padding:10px;border-radius:6px;border:none;
-    font-size:13px;font-weight:600;cursor:default;
-    background:${style==='primary'||style==='link'?color:'#f0f0f0'};
-    color:${style==='primary'?'#fff':(style==='link'?color:'#333')};
-    ${c.flex?`flex:${c.flex};`:''}
-    ${c.margin?`margin-top:${gapPx(c.margin)};`:''}
-  `;
-  btn.textContent = c.action?.label || '';
-  return btn;
-}
-
-function renderImage(c) {
-  const wrap = document.createElement('div');
-  const img = document.createElement('img');
-  img.src = c.url || '';
-  const ratio = c.aspectRatio || '20:13';
-  const [w, h] = ratio.split(':').map(Number);
-  img.style.cssText = `width:${c.size==='full'?'100%':sizeMap(c.size)||'100%'};aspect-ratio:${w}/${h};object-fit:${c.aspectMode||'cover'};display:block;border-radius:4px;`;
-  img.onerror = () => { wrap.style.background='#e8e8e8'; img.style.display='none'; };
-  wrap.appendChild(img);
-  return wrap;
-}
-
-function sizeMap(s) {
-  return {xxs:'10px',xs:'11px',sm:'13px',md:'14px',lg:'17px',xl:'20px',xxl:'24px','3xl':'28px','4xl':'32px','5xl':'40px'}[s] || '14px';
-}
-function gapPx(s) {
-  return {none:'0',xs:'4px',sm:'6px',md:'10px',lg:'16px',xl:'24px',xxl:'32px'}[s] || '8px';
-}
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ──────────────────────────────────
-//  SEND
-// ──────────────────────────────────
-async function onSendClick() {
+// ── SEND ──────────────────────────────
+async function onSend() {
   if (isSending) { abortSend = true; return; }
 
-  const token   = document.getElementById('cfgToken').value.trim();
+  const token  = document.getElementById('cfgToken').value.trim();
   const jsonRaw = document.getElementById('jsonInp').value.trim();
-  const count   = parseInt(document.getElementById('cntNum').value) || 0;
-  const delay   = parseInt(document.getElementById('dlyNum').value) || 200;
-  const sheet   = document.getElementById('cfgSheetName').value.trim() || 'UserData';
+  const count  = parseInt(document.getElementById('cntNum').value) || 0;
+  const delay  = parseInt(document.getElementById('dlyNum').value) || 200;
+  const sheet  = document.getElementById('cfgSheet').value.trim() || 'UserData';
 
-  if (!execUrl) return Toast.fire({icon:'warning',title:'ใส่ Exec URL ก่อน'});
   if (!token)   return Toast.fire({icon:'warning',title:'กรอก Channel Access Token'});
   if (!jsonRaw) return Toast.fire({icon:'warning',title:'วาง Flex Message JSON ก่อน'});
   if (!validateJson()) return Toast.fire({icon:'error',title:'JSON ไม่ถูกต้อง'});
   if (count < 1) return Toast.fire({icon:'warning',title:'ระบุจำนวนผู้รับ'});
+
+  let flexMsg;
+  try { flexMsg = JSON.parse(jsonRaw); } catch(e) { return Toast.fire({icon:'error',title:'JSON ผิดพลาด'}); }
+
+  // ตรวจ contents ฝั่ง browser ก่อนส่ง
+  if (!flexMsg.contents) return Toast.fire({icon:'error',title:'flexMessage ไม่มี contents'});
 
   const { isConfirmed } = await Swal.fire({
     title:'🚀 ยืนยันการส่ง',
@@ -1094,99 +692,81 @@ async function onSendClick() {
   isSending = true; abortSend = false; sentOk = 0; sentFail = 0;
   document.getElementById('sSent').textContent = '0';
   document.getElementById('sFail').textContent = '0';
-  setBtnLoading(true);
+  setBtnStop();
   document.getElementById('progWrap').style.display = 'block';
   clearLog();
-  addLog(`เริ่มส่ง — เป้าหมาย ${count} คน | delay ${delay} ms`, 'nf');
+  addLog('เริ่มส่ง — เป้าหมาย ' + count + ' คน | delay ' + delay + ' ms', 'nf');
 
   try {
-    // ขอ UID จาก GS
-    addLog('กำลังดึง UID จาก Google Sheet...', 'nf');
-    const statsUrl = `${execUrl}?action=getUIDs&count=${count}&sheet=${encodeURIComponent(sheet)}`;
-    const uidRes = await fetchWithTimeout(statsUrl, {}, 30000);
-    const uidData = await uidRes.json();
-
-    if (!uidData.ok || !uidData.uids || uidData.uids.length === 0) {
+    // ดึง UID จาก GS
+    addLog('กำลังดึง UID...', 'nf');
+    const uidData = await (await ft(execUrl + '?action=getUIDs&count=' + count + '&sheet=' + encodeURIComponent(sheet), {}, 30000)).json();
+    if (!uidData.ok || !uidData.uids || uidData.uids.length === 0)
       throw new Error(uidData.message || 'ดึง UID ไม่ได้');
-    }
 
-    const uids = uidData.uids;
-    addLog(`✓ ได้ UID ${uids.length} คน (จากทั้งหมด ${uidData.total})`, 'ok');
-
-    let flexMsg;
-    try { flexMsg = JSON.parse(jsonRaw); } catch(e) { throw new Error('JSON ผิดพลาด'); }
-
-    // ส่งผ่าน Apps Script เป็น batch (หลีกเลี่ยง CORS)
-    const BATCH = 50; // ส่งครั้งละ 50 คน เพื่ออัปเดต progress ได้
+    const uids  = uidData.uids;
     const total = uids.length;
-    addLog(`ส่งผ่าน Apps Script (batch ${BATCH})...`, 'nf');
+    addLog('✓ ได้ UID ' + total + ' คน (จาก ' + uidData.total + ')', 'ok');
 
+    // ส่งเป็น batch ผ่าน GS (หลีกเลี่ยง CORS)
+    const BATCH = 50;
     for (let start = 0; start < total; start += BATCH) {
-      if (abortSend) { addLog(`⏹ หยุดที่ ${start}/${total}`, 'wn'); break; }
+      if (abortSend) { addLog('⏹ หยุดที่ ' + start + '/' + total, 'wn'); break; }
 
-      const batch = uids.slice(start, start + BATCH);
+      const batch   = uids.slice(start, start + BATCH);
+      const payload = JSON.stringify({
+        action     : 'broadcastBatch',
+        token      : token,
+        uids       : batch,
+        flexMessage: flexMsg,
+        delay      : delay,
+      });
+
       try {
-        // ส่งเป็น text/plain เพื่อหลีกเลี่ยง CORS preflight
-        // flexMessageStr แยก stringify เพื่อป้องกัน nested object โดนตัดเวลา GS parse
-        const payload = JSON.stringify({
-          action: 'broadcastBatch',
-          token: token,
-          uids: batch,
-          flexMessage: flexMsg,
-          delay: delay,
-        });
-        const res = await fetchWithTimeout(execUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: payload,
-        }, 120000);
+        const res = await ft(execUrl, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:payload }, 180000);
+        const d   = await res.json();
 
-        const d = await res.json();
-        sentOk   += d.sentOk   || 0;
-        sentFail += d.sentFail || 0;
-
-        const done = Math.min(start + BATCH, total);
-        addLog(`✓ [${done}/${total}] สำเร็จ ${sentOk} | ผิดพลาด ${sentFail}`, d.sentFail > 0 ? 'wn' : 'ok');
-
-        if (d.errors && d.errors.length > 0) {
-          d.errors.forEach(e => addLog(`  ✗ ${e.uid}: ${e.error}`, 'er'));
+        if (d.ok === false) {
+          addLog('✗ GS error: ' + (d.message || JSON.stringify(d)), 'er');
+        } else {
+          sentOk   += d.sentOk   || 0;
+          sentFail += d.sentFail || 0;
+          const done = Math.min(start + BATCH, total);
+          addLog('✓ [' + done + '/' + total + '] สำเร็จ ' + sentOk + ' | ผิดพลาด ' + sentFail, sentFail > 0 ? 'wn' : 'ok');
+          if (d.errors && d.errors.length) d.errors.forEach(e => addLog('  ✗ ' + e.uid + ': ' + e.err, 'er'));
         }
       } catch(err) {
         sentFail += batch.length;
-        addLog(`✗ batch [${start}–${start+batch.length}] error: ${err.message}`, 'er');
+        addLog('✗ batch error: ' + err.message, 'er');
       }
 
       document.getElementById('sSent').textContent = sentOk;
       document.getElementById('sFail').textContent = sentFail;
-      document.getElementById('progBar').style.width = `${Math.round(Math.min(start + BATCH, total) / total * 100)}%`;
+      document.getElementById('progBar').style.width = Math.round(Math.min(start+BATCH,total)/total*100) + '%';
     }
 
-    const icon = sentFail === 0 ? 'success' : (sentOk === 0 ? 'error' : 'warning');
-    addLog(`🎉 เสร็จแล้ว — สำเร็จ ${sentOk} | ผิดพลาด ${sentFail}`, sentOk > 0 ? 'ok' : 'er');
-    Toast.fire({ icon, title:`ส่งเสร็จ ${sentOk} คน`, text: sentFail > 0 ? `ผิดพลาด ${sentFail} คน` : '' });
-
+    addLog('🎉 เสร็จแล้ว — สำเร็จ ' + sentOk + ' | ผิดพลาด ' + sentFail, sentOk > 0 ? 'ok' : 'er');
+    Toast.fire({ icon: sentFail===0?'success':(sentOk===0?'error':'warning'), title:'ส่งเสร็จ '+sentOk+' คน' });
     await loadHistory();
 
   } catch(err) {
-    addLog('❌ Error: ' + err.message, 'er');
-    Toast.fire({ icon:'error', title:'เกิดข้อผิดพลาด', text: err.message });
+    addLog('❌ ' + err.message, 'er');
+    Toast.fire({icon:'error',title:'เกิดข้อผิดพลาด',text:err.message});
   }
 
   finishSend();
 }
 
-function setBtnLoading(on) {
+function setBtnStop() {
   const btn = document.getElementById('sendBtn');
-  if (on) {
-    btn.classList.add('loading');
-    setTimeout(() => {
-      btn.classList.remove('loading');
-      btn.style.background = 'linear-gradient(135deg,#cc2200,#ff5252)';
-      btn.style.color = '#fff';
-      btn.style.boxShadow = '0 4px 18px rgba(255,82,82,.22)';
-      btn.querySelector('.btn-text').textContent = '⏹ หยุดส่ง';
-    }, 600);
-  }
+  btn.classList.add('loading');
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.style.background = 'linear-gradient(135deg,#cc2200,#ff5252)';
+    btn.style.color = '#fff';
+    btn.style.boxShadow = '0 4px 18px rgba(255,82,82,.22)';
+    btn.querySelector('.btn-text').textContent = '⏹ หยุดส่ง';
+  }, 600);
 }
 function finishSend() {
   isSending = false; abortSend = false;
@@ -1198,55 +778,46 @@ function finishSend() {
   btn.querySelector('.btn-text').textContent = '📤 ส่ง Flex Message';
 }
 
-// ──────────────────────────────────
-//  LOG
-// ──────────────────────────────────
-function addLog(msg, cls='nf') {
+// ── LOG ───────────────────────────────
+function addLog(msg, cls) {
+  cls = cls || 'nf';
   const area = document.getElementById('logArea');
-  const now = new Date().toLocaleTimeString('th-TH',{hour12:false,hour:'2-digit',minute:'2-digit'});
-  const div = document.createElement('div');
+  const now  = new Date().toLocaleTimeString('th-TH',{hour12:false,hour:'2-digit',minute:'2-digit'});
+  const div  = document.createElement('div');
   div.className = 'log-row';
-  div.innerHTML = `<span class="log-t">${now}</span><span class="log-m ${cls}">${msg}</span>`;
+  div.innerHTML = '<span class="lt">'+now+'</span><span class="lm '+cls+'">'+msg+'</span>';
   area.appendChild(div);
   area.scrollTop = area.scrollHeight;
 }
 function clearLog() { document.getElementById('logArea').innerHTML = ''; }
 
-// ──────────────────────────────────
-//  MISC UI
-// ──────────────────────────────────
+// ── MISC ──────────────────────────────
 function toggleVis(id, btn) {
   const inp = document.getElementById(id);
-  if (inp.type==='password') { inp.type='text'; btn.textContent='🙈'; }
-  else { inp.type='password'; btn.textContent='👁'; }
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  btn.textContent = inp.type==='password' ? '👁' : '🙈';
 }
 function toggleAdv() {
-  const btn = document.getElementById('advToggle');
-  const body = document.getElementById('advBody');
-  btn.classList.toggle('open');
-  body.classList.toggle('open');
+  document.getElementById('advBtn').classList.toggle('open');
+  document.getElementById('advBody').classList.toggle('open');
 }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ──────────────────────────────────
-//  UTILS
-// ──────────────────────────────────
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-async function fetchWithTimeout(url, opts={}, ms=10000) {
+// ── FETCH WITH TIMEOUT ────────────────
+async function ft(url, opts, ms) {
+  ms = ms || 10000;
   const ctrl = new AbortController();
-  const id = setTimeout(() => ctrl.abort(), ms);
+  const id   = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await fetch(url, { ...opts, signal: ctrl.signal });
+    const r = await fetch(url, Object.assign({}, opts, { signal: ctrl.signal }));
     clearTimeout(id);
     return r;
   } catch(e) {
     clearTimeout(id);
-    throw new Error(e.name === 'AbortError' ? `Timeout (${ms/1000}s)` : e.message);
+    throw new Error(e.name==='AbortError' ? 'Timeout (' + ms/1000 + 's)' : e.message);
   }
 }
 
-// Init sliders
-document.getElementById('cntSlider').addEventListener('input', e => syncCount(e.target.value));
-document.getElementById('dlySlider').addEventListener('input', e => syncDelay(e.target.value));
 updateEst();
 </script>
 </body>
