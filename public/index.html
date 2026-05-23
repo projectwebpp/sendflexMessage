@@ -502,6 +502,12 @@ input[type=range]::-webkit-slider-thumb{
     </div>
     <div class="card-body">
       <div id="tab-raw" class="tab-panel active">
+        <div class="field" style="margin-bottom:.7rem;">
+          <label>Alt Text (ข้อความแจ้งเตือน)</label>
+          <input type="text" id="altTextInp" placeholder="ข้อความที่แสดงในกล่องแจ้งเตือน LINE"
+            oninput="syncAltText()" maxlength="400">
+          <p class="helper">แสดงเมื่ออุปกรณ์ไม่รองรับ Flex — จะถูก sync เข้า JSON อัตโนมัติ</p>
+        </div>
         <div class="json-toolbar">
           <button class="jtbtn" onclick="fmtJson()">✨ Format</button>
           <button class="jtbtn" onclick="clearJson()">🗑 ล้าง</button>
@@ -510,14 +516,14 @@ input[type=range]::-webkit-slider-thumb{
         </div>
         <textarea id="jsonInp"
           placeholder='วาง Flex Message JSON ที่นี่...'
-          oninput="validateJson()"></textarea>
+          oninput="onJsonInput()"></textarea>
         <div class="json-status" id="jsSt">
           <div class="jsdot"></div>
           <span id="jsStTxt">รอ JSON...</span>
         </div>
       </div>
       <div id="tab-preview" class="tab-panel">
-        <div id="jsonTree" style="font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--text2);word-break:break-all;"></div>
+        <div id="previewArea"></div>
       </div>
     </div>
   </div>
@@ -787,7 +793,7 @@ function validateJson() {
 }
 function fmtJson() {
   const ta = document.getElementById('jsonInp');
-  try { ta.value = JSON.stringify(JSON.parse(ta.value), null, 2); validateJson(); Toast.fire({icon:'success',title:'จัด Format แล้ว'}); }
+  try { ta.value = JSON.stringify(JSON.parse(ta.value), null, 2); onJsonInput(); Toast.fire({icon:'success',title:'จัด Format แล้ว'}); }
   catch(e) { Toast.fire({icon:'error',title:'JSON ผิดพลาด',text:e.message}); }
 }
 function clearJson() { document.getElementById('jsonInp').value=''; validateJson(); }
@@ -799,8 +805,36 @@ function copyJson() {
 function loadSample() {
   const s = {"type":"flex","altText":"ทดสอบ LINE Broadcaster","contents":{"type":"bubble","body":{"type":"box","layout":"vertical","contents":[{"type":"text","text":"📣 ทดสอบระบบ","weight":"bold","size":"lg"},{"type":"text","text":"ส่งผ่าน LINE Flex Broadcaster","size":"sm","color":"#888888"}]},"footer":{"type":"box","layout":"horizontal","contents":[{"type":"button","style":"primary","action":{"type":"message","label":"ตอบรับ","text":"ตอบรับแล้ว"}}]}}};
   document.getElementById('jsonInp').value = JSON.stringify(s, null, 2);
-  validateJson();
+  onJsonInput();
   Toast.fire({icon:'info',title:'โหลดตัวอย่างแล้ว'});
+}
+
+// ──────────────────────────────────
+//  ALT TEXT SYNC
+// ──────────────────────────────────
+function syncAltText() {
+  // sync altText input → JSON textarea
+  const altVal = document.getElementById('altTextInp').value;
+  const ta = document.getElementById('jsonInp');
+  if (!ta.value.trim()) return;
+  try {
+    const obj = JSON.parse(ta.value);
+    obj.altText = altVal;
+    ta.value = JSON.stringify(obj, null, 2);
+    validateJson();
+  } catch(_) {}
+}
+
+function onJsonInput() {
+  validateJson();
+  // sync JSON altText → input field
+  try {
+    const obj = JSON.parse(document.getElementById('jsonInp').value);
+    if (obj.altText !== undefined) {
+      const inp = document.getElementById('altTextInp');
+      if (inp.value !== obj.altText) inp.value = obj.altText;
+    }
+  } catch(_) {}
 }
 
 // ──────────────────────────────────
@@ -813,20 +847,216 @@ function switchTab(name, btn) {
   document.getElementById('tab-'+name).classList.add('active');
   if (name==='preview') renderPreview();
 }
+
 function renderPreview() {
-  const el = document.getElementById('jsonTree');
+  const area = document.getElementById('previewArea');
+  let parsed;
   try {
-    el.innerHTML = highlight(JSON.stringify(JSON.parse(document.getElementById('jsonInp').value), null, 2));
-  } catch(e) { el.innerHTML = `<span style="color:var(--red)">✗ ${e.message}</span>`; }
+    parsed = JSON.parse(document.getElementById('jsonInp').value);
+  } catch(e) {
+    area.innerHTML = `<div style="padding:1.5rem;text-align:center;font-size:12px;color:var(--red);">✗ JSON ไม่ถูกต้อง: ${e.message}</div>`;
+    return;
+  }
+
+  const contents = parsed.contents || parsed;
+
+  // สร้าง mock bubble preview ด้วย LINE Flex Simulator URL
+  const encoded = encodeURIComponent(JSON.stringify(contents));
+  const simUrl = `https://developers.line.biz/flex-simulator/?mode=compact`;
+
+  // Render visual preview แบบ native ด้วย HTML
+  area.innerHTML = '';
+
+  // แสดง altText
+  const alt = parsed.altText || '(ไม่มี altText)';
+  const altBadge = document.createElement('div');
+  altBadge.style.cssText = 'font-size:11px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px;';
+  altBadge.innerHTML = `<span style="background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-family:var(--mono);">altText: ${escHtml(alt)}</span>`;
+  area.appendChild(altBadge);
+
+  // Phone frame wrapper
+  const frame = document.createElement('div');
+  frame.style.cssText = `
+    background:#1a1a1a;border-radius:20px;overflow:hidden;
+    border:1.5px solid var(--border2);
+    max-width:340px;margin:0 auto;
+  `;
+
+  // Status bar mock
+  frame.innerHTML = `
+    <div style="background:#111;padding:8px 14px 6px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:10px;color:#888;font-family:var(--mono);">LINE</span>
+      <div style="width:40px;height:4px;background:#333;border-radius:2px;"></div>
+      <span style="font-size:10px;color:#888;">🔋</span>
+    </div>
+    <div style="background:#111820;padding:8px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#00c300,#00e676);display:flex;align-items:center;justify-content:center;font-size:13px;">🤖</div>
+      <span style="font-size:12px;font-weight:600;color:#eee;">Bot</span>
+    </div>
+    <div style="background:#0a1620;padding:12px 10px;min-height:100px;" id="bubbleRender"></div>
+    <div style="background:#111820;padding:8px 10px;display:flex;gap:6px;border-top:1px solid rgba(255,255,255,0.06);">
+      <div style="flex:1;background:#1f2a35;border-radius:20px;height:32px;"></div>
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:14px;">📷</div>
+    </div>
+  `;
+  area.appendChild(frame);
+
+  // เรนเดอร์ bubble ใน chat
+  const bubbleWrap = frame.querySelector('#bubbleRender');
+  try {
+    bubbleWrap.appendChild(buildBubble(contents));
+  } catch(e) {
+    bubbleWrap.innerHTML = `<div style="font-size:11px;color:var(--red);">Render error: ${e.message}</div>`;
+  }
+
+  // ลิงก์ไปเปิดใน Flex Simulator
+  const link = document.createElement('div');
+  link.style.cssText = 'margin-top:10px;text-align:center;';
+  link.innerHTML = `<a href="${simUrl}" target="_blank"
+    style="font-size:11px;color:var(--blue);text-decoration:none;
+    background:var(--blue-dim);border:1px solid rgba(77,166,255,.25);
+    border-radius:6px;padding:5px 12px;display:inline-block;">
+    🔗 เปิดใน LINE Flex Simulator
+  </a>`;
+  area.appendChild(link);
 }
-function highlight(json) {
-  return json.replace(/("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
-    let c = 'color:var(--amber)';
-    if (/^"/.test(m)) c = /:$/.test(m) ? 'color:var(--blue)' : 'color:var(--green)';
-    else if (/true|false/.test(m)) c = 'color:var(--amber)';
-    else if (/null/.test(m)) c = 'color:var(--text3)';
-    return `<span style="${c}">${m}</span>`;
+
+// ──────────────────────────────────
+//  BUBBLE RENDERER
+// ──────────────────────────────────
+function buildBubble(contents) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'border-radius:12px;overflow:hidden;background:#fff;max-width:300px;font-family:sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.4);';
+
+  const type = contents.type || 'bubble';
+
+  if (type === 'bubble') {
+    if (contents.hero)  wrap.appendChild(renderHero(contents.hero));
+    if (contents.header) wrap.appendChild(renderBox(contents.header, { background: contents.styles?.header?.backgroundColor || '#fff', padding: '12px' }));
+    if (contents.body)  wrap.appendChild(renderBox(contents.body,  { background: contents.styles?.body?.backgroundColor  || '#fff', padding: '12px' }));
+    if (contents.footer) wrap.appendChild(renderBox(contents.footer, { background: contents.styles?.footer?.backgroundColor || '#f5f5f5', padding: '8px' }));
+  } else if (type === 'carousel') {
+    wrap.style.cssText = 'display:flex;gap:8px;overflow-x:auto;padding:4px 0;max-width:100%;';
+    (contents.contents || []).forEach(c => {
+      const mini = buildBubble(c);
+      mini.style.flexShrink = '0';
+      mini.style.width = '240px';
+      wrap.appendChild(mini);
+    });
+  }
+  return wrap;
+}
+
+function renderHero(hero) {
+  const div = document.createElement('div');
+  if (hero.type === 'image') {
+    const img = document.createElement('img');
+    img.src = hero.url || '';
+    img.style.cssText = 'width:100%;display:block;object-fit:cover;';
+    const ratio = hero.aspectRatio || '20:13';
+    const [w, h] = ratio.split(':').map(Number);
+    img.style.aspectRatio = `${w}/${h}`;
+    img.onerror = () => { div.style.background='#e0e0e0'; div.style.height='160px'; img.style.display='none'; };
+    div.appendChild(img);
+  }
+  return div;
+}
+
+function renderBox(box, styles = {}) {
+  const div = document.createElement('div');
+  div.style.cssText = `background:${styles.background||'#fff'};padding:${styles.padding||'12px'};`;
+
+  const layout = box.layout || 'vertical';
+  if (layout === 'horizontal' || layout === 'baseline') {
+    div.style.display = 'flex';
+    div.style.gap = '6px';
+    div.style.alignItems = layout === 'baseline' ? 'baseline' : 'center';
+  } else {
+    div.style.display = 'flex';
+    div.style.flexDirection = 'column';
+    div.style.gap = gapPx(box.spacing);
+  }
+
+  (box.contents || []).forEach(c => {
+    const el = renderComponent(c, box);
+    if (el) div.appendChild(el);
   });
+  return div;
+}
+
+function renderComponent(c, parent) {
+  if (!c) return null;
+  switch (c.type) {
+    case 'text': return renderText(c);
+    case 'button': return renderButton(c);
+    case 'image': return renderImage(c);
+    case 'box': return renderBox(c, { background: c.backgroundColor || '' });
+    case 'separator': {
+      const hr = document.createElement('hr');
+      hr.style.cssText = `border:none;border-top:1px solid ${c.color||'#e0e0e0'};margin:${gapPx(c.margin)} 0;`;
+      return hr;
+    }
+    case 'spacer': {
+      const s = document.createElement('div');
+      s.style.height = sizeMap(c.size) || '8px';
+      return s;
+    }
+    default: return null;
+  }
+}
+
+function renderText(c) {
+  const el = document.createElement(c.weight === 'bold' ? 'b' : 'span');
+  el.style.cssText = `
+    display:block;
+    font-size:${sizeMap(c.size)};
+    color:${c.color||'#111'};
+    font-weight:${c.weight==='bold'?'700':'400'};
+    ${c.wrap?'white-space:pre-wrap;word-break:break-word;':'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'}
+    ${c.align?`text-align:${c.align};`:''}
+    ${c.margin?`margin-top:${gapPx(c.margin)};`:''}
+    ${c.flex?`flex:${c.flex};`:''}
+  `;
+  el.textContent = c.text || '';
+  return el;
+}
+
+function renderButton(c) {
+  const btn = document.createElement('button');
+  const style = c.style || 'secondary';
+  const color = c.color || (style === 'primary' ? '#00b300' : '#888');
+  btn.style.cssText = `
+    width:100%;padding:10px;border-radius:6px;border:none;
+    font-size:13px;font-weight:600;cursor:default;
+    background:${style==='primary'||style==='link'?color:'#f0f0f0'};
+    color:${style==='primary'?'#fff':(style==='link'?color:'#333')};
+    ${c.flex?`flex:${c.flex};`:''}
+    ${c.margin?`margin-top:${gapPx(c.margin)};`:''}
+  `;
+  btn.textContent = c.action?.label || '';
+  return btn;
+}
+
+function renderImage(c) {
+  const wrap = document.createElement('div');
+  const img = document.createElement('img');
+  img.src = c.url || '';
+  const ratio = c.aspectRatio || '20:13';
+  const [w, h] = ratio.split(':').map(Number);
+  img.style.cssText = `width:${c.size==='full'?'100%':sizeMap(c.size)||'100%'};aspect-ratio:${w}/${h};object-fit:${c.aspectMode||'cover'};display:block;border-radius:4px;`;
+  img.onerror = () => { wrap.style.background='#e8e8e8'; img.style.display='none'; };
+  wrap.appendChild(img);
+  return wrap;
+}
+
+function sizeMap(s) {
+  return {xxs:'10px',xs:'11px',sm:'13px',md:'14px',lg:'17px',xl:'20px',xxl:'24px','3xl':'28px','4xl':'32px','5xl':'40px'}[s] || '14px';
+}
+function gapPx(s) {
+  return {none:'0',xs:'4px',sm:'6px',md:'10px',lg:'16px',xl:'24px',xxl:'32px'}[s] || '8px';
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ──────────────────────────────────
