@@ -321,32 +321,17 @@ function buildFlexMessage(data, isUpdate = false) {
 }
 
 async function sendFlexAndClose(data, isUpdate = false) {
-  const liff = window.liff;
-  if (!liff) {
-    console.warn("[LIFF] SDK not found");
-    return;
-  }
-
-  const inClient = liff.isInClient?.() || false;
-  if (!inClient) {
-    console.log("[LIFF] Not in LINE client — skip sendMessages/closeWindow");
-    return;
-  }
-
   const flexMessage = buildFlexMessage(data, isUpdate);
 
-  try {
-    await liff.sendMessages([flexMessage]);
-    console.log("[LIFF] sendMessages OK");
-  } catch (err) {
-    console.warn("[LIFF] sendMessages failed:", err?.message || err);
+  if (window.liff) {
+    try {
+      await window.liff.sendMessages([flexMessage]);
+    } catch (err) {
+      console.warn("[LIFF] sendMessages:", err?.message || err);
+    }
   }
 
-  try {
-    liff.closeWindow();
-  } catch (err) {
-    console.warn("[LIFF] closeWindow failed:", err?.message || err);
-  }
+  window.close();
 }
 
 async function showSaveSuccessAndClose(data, isUpdate = false) {
