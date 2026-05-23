@@ -321,15 +321,31 @@ function buildFlexMessage(data, isUpdate = false) {
 }
 
 async function sendFlexAndClose(data, isUpdate = false) {
-  if (!window.liff) return;
+  const liff = window.liff;
+  if (!liff) {
+    console.warn("[LIFF] SDK not found");
+    return;
+  }
+
+  const inClient = liff.isInClient?.() || false;
+  if (!inClient) {
+    console.log("[LIFF] Not in LINE client — skip sendMessages/closeWindow");
+    return;
+  }
+
   const flexMessage = buildFlexMessage(data, isUpdate);
+
   try {
-    if (window.liff.isInClient()) {
-      await window.liff.sendMessages([flexMessage]);
-    }
-    window.liff.closeWindow();
-  } catch {
-    try { window.liff.closeWindow(); } catch { /* noop */ }
+    await liff.sendMessages([flexMessage]);
+    console.log("[LIFF] sendMessages OK");
+  } catch (err) {
+    console.warn("[LIFF] sendMessages failed:", err?.message || err);
+  }
+
+  try {
+    liff.closeWindow();
+  } catch (err) {
+    console.warn("[LIFF] closeWindow failed:", err?.message || err);
   }
 }
 
@@ -340,53 +356,60 @@ async function showSaveSuccessAndClose(data, isUpdate = false) {
   const actionText = isUpdate ? "อัปเดต" : "เพิ่ม";
   const inLiff = window.liff?.isInClient?.() || false;
 
-  const liffHint = inLiff
-    ? `<p style="color:#64748b;font-size:12px;margin:12px 0 0;display:flex;align-items:center;gap:6px">
-        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0"></span>
-        กำลังส่ง Flex Message ลงแชทและปิดหน้าต่าง
-      </p>`
-    : "";
+  const footerHtml = inLiff
+    ? `<div style="margin-top:14px;padding:10px 12px;background:#052e16;border-radius:12px;border:1px solid #14532d;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">📨</span>
+        <span style="color:#86efac;font-size:12px;font-weight:500">จะส่ง Flex Message ลงแชทและปิดหน้าต่างอัตโนมัติ</span>
+      </div>`
+    : `<div style="margin-top:14px;padding:10px 12px;background:#1e293b;border-radius:12px;border:1px solid #334155;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">💾</span>
+        <span style="color:#94a3b8;font-size:12px">บันทึกลง Firebase เรียบร้อยแล้ว</span>
+      </div>`;
 
-  await Swal.fire({
+  const result = await Swal.fire({
     html: `
       <div style="text-align:left;font-family:'Prompt',sans-serif">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-          <div style="width:50px;height:50px;background:linear-gradient(135deg,#22c55e,#059669);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 8px 24px #05966940">✓</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <div style="width:52px;height:52px;background:linear-gradient(135deg,#22c55e,#059669);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 8px 24px rgba(5,150,105,0.4)">✓</div>
           <div>
             <p style="color:#86efac;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px">${actionText}รายชื่อสำเร็จ</p>
-            <p style="color:#fff;font-size:19px;font-weight:700;margin:0;line-height:1.2">${escapeHtml(data.name)}</p>
+            <p style="color:#fff;font-size:20px;font-weight:700;margin:0;line-height:1.2">${escapeHtml(data.name)}</p>
           </div>
         </div>
-        <div style="background:#1e293b;border-radius:16px;overflow:hidden;font-size:13px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
-            <span style="color:#64748b">อีเมล</span>
-            <span style="color:#cbd5e1;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(data.email)}</span>
+        <div style="background:#1e293b;border-radius:16px;overflow:hidden;font-size:13px;border:1px solid #334155">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px">
+            <span style="color:#64748b;display:flex;align-items:center;gap:6px">✉ อีเมล</span>
+            <span style="color:#cbd5e1;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(data.email)}</span>
           </div>
           <div style="height:1px;background:#0f172a"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
-            <span style="color:#64748b">เบอร์โทร</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px">
+            <span style="color:#64748b;display:flex;align-items:center;gap:6px">📱 เบอร์โทร</span>
             <span style="color:#cbd5e1">${escapeHtml(data.phone)}</span>
           </div>
           <div style="height:1px;background:#0f172a"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
-            <span style="color:#64748b">สถานะ</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px">
+            <span style="color:#64748b;display:flex;align-items:center;gap:6px">🏷 สถานะ</span>
             <span style="color:${statusColor};font-weight:700">${statusLabel}</span>
           </div>
         </div>
-        ${liffHint}
+        ${footerHtml}
       </div>
     `,
     background: "#0f172a",
     color: "#f8fafc",
-    confirmButtonText: inLiff ? "ส่งแชทและปิด &nbsp;→" : "ตกลง",
+    confirmButtonText: inLiff ? "ส่งแชทและปิด →" : "ตกลง",
     confirmButtonColor: "#22c55e",
     showConfirmButton: true,
-    timer: inLiff ? 3000 : undefined,
+    allowOutsideClick: !inLiff,
+    timer: inLiff ? 4000 : undefined,
     timerProgressBar: inLiff,
     customClass: { popup: "swal-dark-popup", confirmButton: "swal-green-btn" },
   });
 
-  await sendFlexAndClose(data, isUpdate);
+  // ถ้า user กด confirm หรือ timer หมด → ส่ง flex และปิด LIFF
+  if (result.isConfirmed || result.isDismissed) {
+    await sendFlexAndClose(data, isUpdate);
+  }
 }
 
 const liffId =
