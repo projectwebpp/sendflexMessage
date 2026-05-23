@@ -1126,17 +1126,20 @@ async function onSendClick() {
 
       const batch = uids.slice(start, start + BATCH);
       try {
+        // ส่งเป็น text/plain เพื่อหลีกเลี่ยง CORS preflight
+        // flexMessageStr แยก stringify เพื่อป้องกัน nested object โดนตัดเวลา GS parse
+        const payload = JSON.stringify({
+          action: 'broadcastBatch',
+          token: token,
+          uids: batch,
+          flexMessage: flexMsg,
+          delay: delay,
+        });
         const res = await fetchWithTimeout(execUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' }, // GS ต้องการ text/plain เพื่อหลีกเลี่ยง preflight
-          body: JSON.stringify({
-            action: 'broadcastBatch',
-            token,
-            uids: batch,
-            flexMessage: flexMsg,
-            delay,
-          }),
-        }, 120000); // 2 นาที timeout ต่อ batch
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: payload,
+        }, 120000);
 
         const d = await res.json();
         sentOk   += d.sentOk   || 0;
