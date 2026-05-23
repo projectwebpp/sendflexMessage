@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE Flex Broadcaster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #17171b;
+    --surface2: #1f1f25;
+    --surface3: #27272f;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f2;
+    --text2: #9898a6;
+    --text3: #5a5a6a;
+    --green: #00e676;
+    --green-dim: rgba(0,230,118,0.12);
+    --blue: #4da6ff;
+    --blue-dim: rgba(77,166,255,0.12);
+    --red: #ff5252;
+    --red-dim: rgba(255,82,82,0.12);
+    --amber: #ffab40;
+    --amber-dim: rgba(255,171,64,0.12);
+    --font: 'IBM Plex Sans Thai', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --r: 12px;
+    --r-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,13,15,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #00c300 0%, #00e676 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(0,230,118,0.3);
+  }
+
+  .header-text h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
+  .header-text p { font-size: 11px; color: var(--text2); margin-top: 1px; }
+
+  /* Status badge */
+  .status-pill {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    background: var(--green-dim);
+    border: 1px solid rgba(0,230,118,0.25);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Main container */
+  .container { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  /* Section card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 0.875rem 1rem;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .card-icon {
+    width: 28px; height: 28px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .icon-blue { background: var(--blue-dim); color: var(--blue); }
+  .icon-green { background: var(--green-dim); color: var(--green); }
+  .icon-amber { background: var(--amber-dim); color: var(--amber); }
+
+  .card-header h2 { font-size: 13px; font-weight: 600; color: var(--text); }
+  .card-header span.sub { font-size: 11px; color: var(--text2); margin-left: auto; }
+
+  .card-body { padding: 1rem; }
+
+  /* Form elements */
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  input[type="text"], input[type="password"], input[type="number"] {
+    width: 100%;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus,
+  input[type="number"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(77,166,255,0.15);
+  }
+
+  input::placeholder { color: var(--text3); }
+
+  textarea {
+    width: 100%;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 10px 12px;
+    outline: none;
+    resize: vertical;
+    min-height: 200px;
+    line-height: 1.6;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+
+  textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(77,166,255,0.15);
+  }
+
+  .field { margin-bottom: 0.875rem; }
+  .field:last-child { margin-bottom: 0; }
+
+  /* Token visibility toggle */
+  .input-wrap { position: relative; }
+  .toggle-vis {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text3); cursor: pointer;
+    font-size: 14px; padding: 4px; line-height: 1;
+    transition: color 0.2s;
+  }
+  .toggle-vis:hover { color: var(--text2); }
+
+  /* Count row */
+  .count-row { display: flex; gap: 10px; align-items: flex-end; }
+  .count-row .field { flex: 1; }
+  .count-info {
+    font-size: 11px; color: var(--text2);
+    padding-bottom: 11px;
+    white-space: nowrap;
+  }
+
+  /* Slider */
+  .slider-wrap { display: flex; align-items: center; gap: 10px; }
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--blue);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(77,166,255,0.4);
+  }
+  .slider-val {
+    font-family: var(--mono);
+    font-size: 13px; font-weight: 500;
+    color: var(--blue);
+    min-width: 40px; text-align: right;
+  }
+
+  /* Sheet ID row */
+  .sheet-row { display: flex; gap: 8px; }
+  .sheet-row input { flex: 1; }
+  .sheet-row button {
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-sm);
+    color: var(--text2);
+    font-size: 11px;
+    padding: 0 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: var(--font);
+  }
+  .sheet-row button:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* JSON toolbar */
+  .json-toolbar {
+    display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .json-btn {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 11px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .json-btn:hover { border-color: var(--border2); color: var(--text); }
+  .json-btn.active { background: var(--blue-dim); border-color: rgba(77,166,255,0.3); color: var(--blue); }
+
+  /* JSON status */
+  .json-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; margin-top: 6px;
+    color: var(--text3);
+    min-height: 18px;
+    transition: color 0.2s;
+  }
+  .json-status.ok { color: var(--green); }
+  .json-status.err { color: var(--red); }
+  .json-status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  /* Stats row */
+  .stats-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .stat-card {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .stat-val { font-size: 18px; font-weight: 600; font-family: var(--mono); }
+  .stat-lbl { font-size: 10px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Send button */
+  .send-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: var(--r);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: opacity 0.2s, transform 0.1s;
+    background: linear-gradient(135deg, #00b300, #00e676);
+    color: #001a00;
+    letter-spacing: -0.2px;
+    box-shadow: 0 4px 20px rgba(0,230,118,0.25);
+  }
+
+  .send-btn:disabled {
+    background: var(--surface3);
+    color: var(--text3);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .send-btn:not(:disabled):active { transform: scale(0.98); }
+
+  .send-btn .spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #001a00;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .send-btn.loading .btn-text { display: none; }
+  .send-btn.loading .spinner { display: block; }
+
+  /* Log area */
+  .log-wrap {
+    background: var(--surface3);
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 8px 10px;
+  }
+
+  .log-entry {
+    padding: 2px 0;
+    display: flex; gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-time { color: var(--text3); flex-shrink: 0; }
+  .log-msg { flex: 1; word-break: break-all; }
+  .log-ok { color: var(--green); }
+  .log-err { color: var(--red); }
+  .log-info { color: var(--blue); }
+  .log-warn { color: var(--amber); }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--surface3);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #00b300, #00e676);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); }
+
+  /* Helper text */
+  .helper {
+    font-size: 11px; color: var(--text3); margin-top: 5px; line-height: 1.5;
+  }
+  .helper a { color: var(--blue); text-decoration: none; }
+
+  /* Tabs */
+  .tab-row {
+    display: flex; gap: 4px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .tab {
+    flex: 1; background: none; border: 1px solid transparent;
+    border-radius: var(--r-sm); padding: 6px 4px;
+    font-family: var(--font); font-size: 11px; color: var(--text2);
+    cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .tab.active { background: var(--surface3); border-color: var(--border2); color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* SweetAlert2 custom */
+  .swal-dark {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border2) !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">💬</div>
+  <div class="header-text">
+    <h1>LINE Flex Broadcaster</h1>
+    <p>ส่ง Flex Message หาผู้ใช้งาน</p>
+  </div>
+  <div class="status-pill" onclick="checkStatus()">
+    <div class="status-dot"></div>
+    <span id="status-text">พร้อม</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Config Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-blue">🔑</div>
+      <h2>ตั้งค่าการเชื่อมต่อ</h2>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Channel Access Token</label>
+        <div class="input-wrap">
+          <input type="password" id="token" placeholder="ใส่ LINE Channel Access Token" autocomplete="off">
+          <button class="toggle-vis" onclick="toggleVis('token', this)" title="แสดง/ซ่อน">👁</button>
+        </div>
+        <p class="helper">ดูได้ที่ <a href="https://developers.line.biz/console/" target="_blank">LINE Developers Console</a></p>
+      </div>
+
+      <div class="field">
+        <label>Google Sheet ID (สำหรับดึง UID)</label>
+        <div class="sheet-row">
+          <input type="text" id="sheetId" placeholder="1NA6bHu7ULN..." value="">
+          <button onclick="pasteSheetId()">📋 วาง</button>
+        </div>
+        <p class="helper">จาก URL: docs.google.com/spreadsheets/d/<strong style="color:var(--amber)">SHEET_ID</strong>/edit</p>
+      </div>
+
+      <div class="field">
+        <label>Sheet Name</label>
+        <input type="text" id="sheetName" placeholder="UserData" value="UserData">
+      </div>
+
+      <div class="field">
+        <label>Apps Script Exec URL (Web App)</label>
+        <input type="text" id="execUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        <p class="helper">ต้อง Deploy เป็น Web App ก่อน แล้วนำ URL มาวางที่นี่</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipients Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-amber">👥</div>
+      <h2>กำหนดจำนวนผู้รับ</h2>
+      <span class="sub" id="uid-count-display">—</span>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>จำนวนที่จะส่ง (สุ่มจากทั้งหมด)</label>
+        <div class="slider-wrap">
+          <input type="range" id="countSlider" min="1" max="500" value="150" step="1"
+            oninput="document.getElementById('countNum').value=this.value; updateCount()">
+          <span class="slider-val" id="sliderVal">150</span>
+        </div>
+        <div style="margin-top: 10px; display:flex; gap:8px; align-items:center;">
+          <input type="number" id="countNum" value="150" min="1" max="10000"
+            style="width:90px;"
+            oninput="document.getElementById('countSlider').value=Math.min(this.value,500); document.getElementById('sliderVal').textContent=this.value; updateCount()">
+          <span style="font-size:12px; color:var(--text2)">คน</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Delay ระหว่างแต่ละ Message (ms)</label>
+        <div class="slider-wrap">
+          <input type="range" id="delaySlider" min="100" max="2000" value="200" step="100"
+            oninput="document.getElementById('delayVal').textContent=this.value+'ms'; document.getElementById('delayNum').value=this.value">
+          <span class="slider-val" id="delayVal">200ms</span>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+          <input type="number" id="delayNum" value="200" min="100" max="5000"
+            style="width:90px;"
+            oninput="document.getElementById('delaySlider').value=Math.min(this.value,2000); document.getElementById('delayVal').textContent=this.value+'ms'">
+          <span style="font-size:12px; color:var(--text2)">มิลลิวินาที</span>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--blue)" id="stat-target">150</div>
+          <div class="stat-lbl">เป้าหมาย</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--amber)" id="stat-est">~30s</div>
+          <div class="stat-lbl">เวลาประมาณ</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--green)" id="stat-sent">0</div>
+          <div class="stat-lbl">ส่งแล้ว</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flex JSON Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-green">📋</div>
+      <h2>Flex Message JSON</h2>
+      <span class="sub" id="json-byte-count">0 bytes</span>
+    </div>
+    <div class="tab-row">
+      <button class="tab active" onclick="switchTab('raw', this)">📝 วาง JSON</button>
+      <button class="tab" onclick="switchTab('preview', this)">👁 ตรวจสอบ</button>
+    </div>
+
+    <div class="card-body">
+      <div id="tab-raw" class="tab-panel active">
+        <div class="json-toolbar">
+          <button class="json-btn" onclick="formatJson()">✨ จัด Format</button>
+          <button class="json-btn" onclick="clearJson()">🗑 ล้าง</button>
+          <button class="json-btn" onclick="loadSampleJson()">📎 ตัวอย่าง</button>
+          <button class="json-btn" onclick="copyJson()">📋 คัดลอก</button>
+        </div>
+        <textarea id="jsonInput" placeholder='วาง Flex Message JSON ที่นี่...
+ตัวอย่าง:
+{
+  "type": "flex",
+  "altText": "ข้อความ",
+  "contents": { ... }
+}'
+          oninput="validateJson()"></textarea>
+        <div class="json-status" id="json-status">
+          <div class="json-status-dot"></div>
+          <span id="json-status-text">รอ JSON...</span>
+        </div>
+      </div>
+
+      <div id="tab-preview" class="tab-panel">
+        <div id="json-tree" style="font-family:var(--mono); font-size:11px; line-height:1.7; color:var(--text2);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-green">🚀</div>
+      <h2>ส่ง Broadcast</h2>
+    </div>
+    <div class="card-body">
+      <div class="progress-wrap" id="progress-wrap" style="display:none">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <button class="send-btn" id="sendBtn" onclick="startBroadcast()">
+        <span class="btn-text">📤 ส่ง Flex Message ทันที</span>
+        <div class="spinner"></div>
+      </button>
+
+      <div style="height:12px;"></div>
+
+      <div class="card-header" style="border-radius:var(--r-sm); margin-bottom:8px;">
+        <span style="font-size:12px; color:var(--text2);">📋 Log การส่ง</span>
+        <span class="sub" style="cursor:pointer; color:var(--red);" onclick="clearLog()">ล้าง</span>
+      </div>
+      <div class="log-wrap" id="logArea">
+        <div class="log-entry">
+          <span class="log-time">--:--:--</span>
+          <span class="log-msg log-info">พร้อมใช้งาน กรอกข้อมูลแล้วกดส่ง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SweetAlert2 dark theme config -->
+<script>
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  customClass: {
+    popup: 'swal-dark'
+  },
+  background: '#17171b',
+  color: '#f0f0f2'
+});
+
+let isSending = false;
+let sentCount = 0;
+let abortSend = false;
+
+function toggleVis(id, btn) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+function updateCount() {
+  const n = parseInt(document.getElementById('countNum').value) || 0;
+  const delay = parseInt(document.getElementById('delayNum').value) || 200;
+  document.getElementById('sliderVal').textContent = Math.min(n, 500);
+  document.getElementById('stat-target').textContent = n.toLocaleString();
+  const secs = Math.round((n * delay) / 1000);
+  document.getElementById('stat-est').textContent = secs < 60 ? `~${secs}s` : `~${Math.round(secs/60)}m`;
+}
+
+function validateJson() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  const statusEl = document.getElementById('json-status');
+  const statusText = document.getElementById('json-status-text');
+  const byteCount = document.getElementById('json-byte-count');
+
+  if (!raw) {
+    statusEl.className = 'json-status';
+    statusText.textContent = 'รอ JSON...';
+    byteCount.textContent = '0 bytes';
+    return false;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    const bytes = new Blob([raw]).size;
+    byteCount.textContent = bytes > 1024 ? `${(bytes/1024).toFixed(1)} KB` : `${bytes} bytes`;
+    statusEl.className = 'json-status ok';
+    statusText.textContent = `✓ JSON ถูกต้อง — type: "${parsed.type || 'ไม่ระบุ'}"`;
+    return true;
+  } catch(e) {
+    statusEl.className = 'json-status err';
+    statusText.textContent = `✗ JSON ผิดพลาด: ${e.message}`;
+    byteCount.textContent = '—';
+    return false;
+  }
+}
+
+function formatJson() {
+  const ta = document.getElementById('jsonInput');
+  try {
+    ta.value = JSON.stringify(JSON.parse(ta.value), null, 2);
+    validateJson();
+    Toast.fire({ icon: 'success', title: 'จัด Format เรียบร้อย' });
+  } catch(e) {
+    Toast.fire({ icon: 'error', title: 'JSON ไม่ถูกต้อง', text: e.message });
+  }
+}
+
+function clearJson() {
+  document.getElementById('jsonInput').value = '';
+  validateJson();
+}
+
+function copyJson() {
+  const val = document.getElementById('jsonInput').value;
+  if (!val) return Toast.fire({ icon: 'warning', title: 'ไม่มีข้อมูลให้คัดลอก' });
+  navigator.clipboard.writeText(val).then(() => Toast.fire({ icon: 'success', title: 'คัดลอกแล้ว' }));
+}
+
+function loadSampleJson() {
+  const sample = {"type":"flex","altText":"ข้อความทดสอบจาก LINE Broadcaster","contents":{"type":"bubble","body":{"type":"box","layout":"vertical","contents":[{"type":"text","text":"📣 ทดสอบระบบ","weight":"bold","size":"lg"},{"type":"text","text":"ส่งผ่าน LINE Flex Broadcaster","size":"sm","color":"#888888"}]},"footer":{"type":"box","layout":"horizontal","contents":[{"type":"button","style":"primary","action":{"type":"message","label":"ตอบรับ","text":"ตอบรับแล้ว"}}]}}};
+  document.getElementById('jsonInput').value = JSON.stringify(sample, null, 2);
+  validateJson();
+  Toast.fire({ icon: 'info', title: 'โหลดตัวอย่างแล้ว' });
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+
+  if (name === 'preview') renderPreview();
+}
+
+function renderPreview() {
+  const el = document.getElementById('json-tree');
+  try {
+    const parsed = JSON.parse(document.getElementById('jsonInput').value);
+    el.innerHTML = syntaxHighlight(JSON.stringify(parsed, null, 2));
+  } catch(e) {
+    el.innerHTML = `<span style="color:var(--red)">⚠ JSON ไม่ถูกต้อง: ${e.message}</span>`;
+  }
+}
+
+function syntaxHighlight(json) {
+  return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+    let cls = 'color:var(--amber)';
+    if (/^"/.test(m)) cls = /:$/.test(m) ? 'color:var(--blue)' : 'color:var(--green)';
+    else if (/true|false/.test(m)) cls = 'color:var(--amber)';
+    else if (/null/.test(m)) cls = 'color:var(--text3)';
+    return `<span style="${cls}">${m}</span>`;
+  });
+}
+
+async function pasteSheetId() {
+  try {
+    const text = await navigator.clipboard.readText();
+    const match = text.match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) {
+      document.getElementById('sheetId').value = match[1];
+      Toast.fire({ icon: 'success', title: 'แยก Sheet ID จาก URL แล้ว' });
+    } else {
+      document.getElementById('sheetId').value = text;
+      Toast.fire({ icon: 'info', title: 'วางข้อความแล้ว' });
+    }
+  } catch {
+    Toast.fire({ icon: 'error', title: 'ไม่สามารถวางได้', text: 'กรุณาวางด้วยตนเอง' });
+  }
+}
+
+function addLog(msg, type = 'info') {
+  const log = document.getElementById('logArea');
+  const now = new Date().toLocaleTimeString('th-TH', {hour12: false});
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = `<span class="log-time">${now}</span><span class="log-msg log-${type}">${msg}</span>`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('logArea').innerHTML = '';
+}
+
+function checkStatus() {
+  const token = document.getElementById('token').value.trim();
+  if (!token) return Toast.fire({ icon: 'warning', title: 'กรอก Token ก่อน' });
+
+  fetch('https://api.line.me/v2/bot/info', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(r => r.json()).then(d => {
+    if (d.basicId) {
+      document.getElementById('status-text').textContent = d.displayName || 'เชื่อมต่อแล้ว';
+      Toast.fire({ icon: 'success', title: `✓ ${d.displayName}`, text: `@${d.basicId}` });
+    } else {
+      Toast.fire({ icon: 'error', title: 'Token ไม่ถูกต้อง' });
+    }
+  }).catch(() => Toast.fire({ icon: 'error', title: 'ไม่สามารถเชื่อมต่อได้' }));
+}
+
+async function startBroadcast() {
+  if (isSending) {
+    abortSend = true;
+    return;
+  }
+
+  const token = document.getElementById('token').value.trim();
+  const execUrl = document.getElementById('execUrl').value.trim();
+  const countVal = parseInt(document.getElementById('countNum').value) || 0;
+  const delay = parseInt(document.getElementById('delayNum').value) || 200;
+  const jsonRaw = document.getElementById('jsonInput').value.trim();
+
+  if (!token) return Toast.fire({ icon: 'warning', title: 'กรุณากรอก Channel Access Token' });
+  if (!execUrl) return Toast.fire({ icon: 'warning', title: 'กรุณากรอก Apps Script URL' });
+  if (!jsonRaw) return Toast.fire({ icon: 'warning', title: 'กรุณาวาง Flex Message JSON' });
+  if (!validateJson()) return Toast.fire({ icon: 'error', title: 'JSON ไม่ถูกต้อง' });
+  if (countVal < 1) return Toast.fire({ icon: 'warning', title: 'ระบุจำนวนผู้รับ' });
+
+  const { isConfirmed } = await Swal.fire({
+    title: '🚀 ยืนยันการส่ง',
+    html: `<div style="font-family:'IBM Plex Sans Thai',sans-serif; color:#9898a6; font-size:14px; line-height:1.8;">
+      ส่งให้ <strong style="color:#f0f0f2; font-size:20px;">${countVal.toLocaleString()}</strong> คน<br>
+      Delay: <strong style="color:#4da6ff;">${delay} ms</strong> ต่อคน<br>
+      เวลาประมาณ: <strong style="color:#ffab40;">${Math.round(countVal*delay/1000)}+ วินาที</strong>
+    </div>`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'ส่งเลย',
+    cancelButtonText: 'ยกเลิก',
+    background: '#17171b',
+    color: '#f0f0f2',
+    confirmButtonColor: '#00b300',
+    cancelButtonColor: '#3a3a45',
+  });
+
+  if (!isConfirmed) return;
+
+  let flexMsg;
+  try { flexMsg = JSON.parse(jsonRaw); } catch { return; }
+
+  isSending = true;
+  abortSend = false;
+  sentCount = 0;
+
+  const btn = document.getElementById('sendBtn');
+  btn.classList.add('loading');
+  btn.disabled = false;
+  btn.querySelector('.btn-text').style.display = 'none';
+  btn.querySelector('.spinner').style.display = 'block';
+
+  // Change button to abort
+  setTimeout(() => {
+    btn.querySelector('.spinner').style.display = 'none';
+    btn.querySelector('.btn-text').style.display = 'block';
+    btn.querySelector('.btn-text').textContent = '⏹ หยุดส่ง';
+    btn.style.background = 'linear-gradient(135deg, #cc3300, #ff5252)';
+    btn.style.color = '#fff';
+    btn.style.boxShadow = '0 4px 20px rgba(255,82,82,0.25)';
+  }, 500);
+
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('stat-sent').textContent = '0';
+  clearLog();
+  addLog(`เริ่มส่ง — เป้าหมาย ${countVal} คน | delay ${delay}ms`, 'info');
+
+  // Call Apps Script to get UIDs and send
+  try {
+    addLog('กำลังดึง UID จาก Google Sheet...', 'info');
+
+    const sheetId = document.getElementById('sheetId').value.trim();
+    const sheetName = document.getElementById('sheetName').value.trim() || 'UserData';
+
+    // Call via Apps Script Web App
+    const apiUrl = `${execUrl}?action=broadcast&count=${countVal}&delay=${delay}`;
+    addLog(`เรียก Apps Script...`, 'info');
+
+    // We'll do client-side sending if user provides token directly
+    // First try to get UIDs from Apps Script
+    const resp = await fetch(apiUrl + '&action=getUIDs', { method: 'GET' });
+    const result = await resp.json();
+
+    if (result.uids && result.uids.length > 0) {
+      const uids = result.uids.slice(0, countVal);
+      addLog(`ได้ UID ${uids.length} คน`, 'ok');
+      await sendToUIDs(uids, flexMsg, token, delay, countVal);
+    } else {
+      addLog('ไม่พบ UID จาก Apps Script — ลองส่งผ่าน Apps Script โดยตรง', 'warn');
+      // Fallback: call Apps Script to do the sending
+      await callAppsScriptBroadcast(execUrl, token, flexMsg, countVal, delay);
+    }
+  } catch(err) {
+    addLog(`Error: ${err.message}`, 'err');
+    // Fallback: send directly
+    addLog('ส่งผ่าน LINE API โดยตรง (ต้องมี UID)...', 'warn');
+    Toast.fire({ icon: 'warning', title: 'ไม่สามารถดึง UID จาก Apps Script', text: 'ตรวจสอบ URL และ Deploy Settings' });
+  }
+
+  finishBroadcast();
+}
+
+async function sendToUIDs(uids, flexMsg, token, delay, total) {
+  let ok = 0, fail = 0;
+  for (let i = 0; i < uids.length; i++) {
+    if (abortSend) { addLog(`⏹ ผู้ใช้หยุดส่งที่ ${i}/${uids.length}`, 'warn'); break; }
+    const uid = uids[i];
+    try {
+      const r = await fetch('https://api.line.me/v2/bot/message/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ to: uid, messages: [flexMsg] })
+      });
+      if (r.ok) { ok++; addLog(`✓ [${i+1}/${uids.length}] ${uid.substring(0,12)}...`, 'ok'); }
+      else { fail++; const e = await r.json(); addLog(`✗ [${i+1}] ${e.message}`, 'err'); }
+    } catch(e) { fail++; addLog(`✗ ${e.message}`, 'err'); }
+
+    sentCount = i + 1;
+    document.getElementById('stat-sent').textContent = sentCount;
+    document.getElementById('progress-bar').style.width = `${Math.round(sentCount/total*100)}%`;
+    if (i < uids.length - 1) await sleep(delay);
+  }
+  addLog(`🎉 เสร็จแล้ว — ส่งสำเร็จ ${ok} คน, ล้มเหลว ${fail} คน`, ok > 0 ? 'ok' : 'err');
+}
+
+async function callAppsScriptBroadcast(url, token, flexMsg, count, delay) {
+  try {
+    addLog('กำลังส่งคำสั่งไป Apps Script...', 'info');
+    const r = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'broadcast', token, flexMessage: flexMsg, count, delay }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const result = await r.json();
+    addLog(`Apps Script: ${result.message || JSON.stringify(result)}`, result.success ? 'ok' : 'err');
+  } catch(e) {
+    addLog(`Apps Script error: ${e.message}`, 'err');
+  }
+}
+
+function finishBroadcast() {
+  isSending = false;
+  abortSend = false;
+  const btn = document.getElementById('sendBtn');
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  btn.style.background = 'linear-gradient(135deg, #00b300, #00e676)';
+  btn.style.color = '#001a00';
+  btn.style.boxShadow = '0 4px 20px rgba(0,230,118,0.25)';
+  btn.querySelector('.btn-text').textContent = '📤 ส่ง Flex Message ทันที';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Init
+updateCount();
+document.getElementById('countSlider').addEventListener('input', function() {
+  document.getElementById('countNum').value = this.value;
+  updateCount();
+});
+</script>
+</body>
+</html>
