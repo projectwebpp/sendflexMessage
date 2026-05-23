@@ -62,10 +62,338 @@ const editEmailInput = document.querySelector("#editEmail");
 const editPhoneInput = document.querySelector("#editPhone");
 const editStatusInput = document.querySelector("#editStatus");
 const editNotesInput = document.querySelector("#editNotes");
+const lineProfileImage = document.querySelector("#lineProfileImage");
+const lineProfileFallback = document.querySelector("#lineProfileFallback");
+const lineDisplayName = document.querySelector("#lineDisplayName");
+const lineEmailText = document.querySelector("#lineEmailText");
+const lineProfileStatus = document.querySelector("#lineProfileStatus");
+const lineProfileRefresh = document.querySelector("#lineProfileRefresh");
 
 let contacts = [];
 let useDemoStorage = false;
 let captchaVerified = false;
+let lineProfileLoaded = false;
+
+function buildFlexMessage(data, isUpdate = false) {
+  const isActive = data.status === "active";
+  const statusLabel = isActive ? "ใช้งาน" : "ไม่ใช้งาน";
+  const statusColor = isActive ? "#34d399" : "#fbbf24";
+  const statusBg = isActive ? "#064e3b" : "#451a03";
+  const headerBg = isActive ? "#059669" : "#b45309";
+  const actionText = isUpdate ? "อัปเดตรายชื่อ" : "เพิ่มรายชื่อใหม่";
+
+  const now = new Date().toLocaleString("th-TH", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const infoRows = [
+    {
+      icon: "👤",
+      label: "ชื่อ-นามสกุล",
+      value: data.name,
+      valueColor: "#f8fafc",
+      weight: "bold",
+      size: "md",
+    },
+    {
+      icon: "✉",
+      label: "อีเมล",
+      value: data.email,
+      valueColor: "#94a3b8",
+      wrap: true,
+    },
+    {
+      icon: "📱",
+      label: "เบอร์โทร",
+      value: data.phone,
+      valueColor: "#94a3b8",
+    },
+  ];
+
+  if (data.notes) {
+    infoRows.push({
+      icon: "📝",
+      label: "หมายเหตุ",
+      value: data.notes,
+      valueColor: "#64748b",
+      wrap: true,
+    });
+  }
+
+  const bodyContents = [];
+
+  infoRows.forEach((row, idx) => {
+    if (idx > 0) bodyContents.push({ type: "separator", color: "#1e293b" });
+
+    bodyContents.push({
+      type: "box",
+      layout: "horizontal",
+      alignItems: "center",
+      paddingTop: "10px",
+      paddingBottom: "10px",
+      contents: [
+        {
+          type: "text",
+          text: row.icon,
+          size: "sm",
+          flex: 0,
+        },
+        {
+          type: "box",
+          layout: "vertical",
+          flex: 1,
+          margin: "md",
+          contents: [
+            {
+              type: "text",
+              text: row.label,
+              color: "#475569",
+              size: "xxs",
+            },
+            {
+              type: "text",
+              text: row.value || "-",
+              color: row.valueColor || "#f8fafc",
+              size: row.size || "sm",
+              weight: row.weight || "regular",
+              wrap: row.wrap || false,
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  bodyContents.push({ type: "separator", color: "#1e293b" });
+  bodyContents.push({
+    type: "box",
+    layout: "horizontal",
+    alignItems: "center",
+    paddingTop: "10px",
+    paddingBottom: "4px",
+    contents: [
+      { type: "text", text: "🏷", size: "sm", flex: 0 },
+      {
+        type: "box",
+        layout: "horizontal",
+        flex: 1,
+        margin: "md",
+        alignItems: "center",
+        justifyContent: "space-between",
+        contents: [
+          { type: "text", text: "สถานะ", color: "#475569", size: "xxs" },
+          {
+            type: "box",
+            layout: "vertical",
+            backgroundColor: statusBg,
+            cornerRadius: "12px",
+            paddingTop: "4px",
+            paddingBottom: "4px",
+            paddingStart: "10px",
+            paddingEnd: "10px",
+            contents: [
+              {
+                type: "text",
+                text: statusLabel,
+                color: statusColor,
+                size: "xxs",
+                weight: "bold",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  bodyContents.push({
+    type: "text",
+    text: `บันทึกเมื่อ ${now}`,
+    color: "#334155",
+    size: "xxs",
+    align: "end",
+    margin: "lg",
+  });
+
+  return {
+    type: "flex",
+    altText: `${actionText}สำเร็จ ✓ ${data.name}`,
+    contents: {
+      type: "bubble",
+      size: "mega",
+      header: {
+        type: "box",
+        layout: "vertical",
+        backgroundColor: headerBg,
+        paddingAll: "20px",
+        contents: [
+          {
+            type: "box",
+            layout: "horizontal",
+            alignItems: "center",
+            contents: [
+              {
+                type: "box",
+                layout: "vertical",
+                flex: 1,
+                contents: [
+                  {
+                    type: "text",
+                    text: "SENDFLEX CRM",
+                    color: "#d1fae5",
+                    size: "xxs",
+                    weight: "bold",
+                  },
+                  {
+                    type: "text",
+                    text: actionText,
+                    color: "#ffffff",
+                    size: "xl",
+                    weight: "bold",
+                    margin: "xs",
+                  },
+                ],
+              },
+              {
+                type: "box",
+                layout: "vertical",
+                width: "48px",
+                height: "48px",
+                cornerRadius: "24px",
+                backgroundColor: "#ffffff25",
+                justifyContent: "center",
+                alignItems: "center",
+                contents: [
+                  {
+                    type: "text",
+                    text: "✓",
+                    color: "#ffffff",
+                    size: "xxl",
+                    weight: "bold",
+                    align: "center",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      body: {
+        type: "box",
+        layout: "vertical",
+        backgroundColor: "#0f172a",
+        paddingAll: "16px",
+        contents: bodyContents,
+      },
+      footer: {
+        type: "box",
+        layout: "horizontal",
+        spacing: "sm",
+        backgroundColor: "#0f172a",
+        paddingAll: "12px",
+        contents: [
+          {
+            type: "button",
+            action: { type: "uri", label: "📞 โทรออก", uri: `tel:${data.phone}` },
+            style: "secondary",
+            height: "sm",
+            color: "#1e293b",
+          },
+          {
+            type: "button",
+            action: { type: "uri", label: "✉ ส่งอีเมล", uri: `mailto:${data.email}` },
+            style: "primary",
+            height: "sm",
+            color: "#059669",
+          },
+        ],
+      },
+      styles: {
+        footer: { separator: true, separatorColor: "#1e293b" },
+      },
+    },
+  };
+}
+
+async function sendFlexAndClose(data, isUpdate = false) {
+  if (!window.liff) return;
+  const flexMessage = buildFlexMessage(data, isUpdate);
+  try {
+    if (window.liff.isInClient()) {
+      await window.liff.sendMessages([flexMessage]);
+    }
+    window.liff.closeWindow();
+  } catch {
+    try { window.liff.closeWindow(); } catch { /* noop */ }
+  }
+}
+
+async function showSaveSuccessAndClose(data, isUpdate = false) {
+  const isActive = data.status === "active";
+  const statusLabel = isActive ? "ใช้งาน" : "ไม่ใช้งาน";
+  const statusColor = isActive ? "#34d399" : "#fbbf24";
+  const actionText = isUpdate ? "อัปเดต" : "เพิ่ม";
+  const inLiff = window.liff?.isInClient?.() || false;
+
+  const liffHint = inLiff
+    ? `<p style="color:#64748b;font-size:12px;margin:12px 0 0;display:flex;align-items:center;gap:6px">
+        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0"></span>
+        กำลังส่ง Flex Message ลงแชทและปิดหน้าต่าง
+      </p>`
+    : "";
+
+  await Swal.fire({
+    html: `
+      <div style="text-align:left;font-family:'Prompt',sans-serif">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div style="width:50px;height:50px;background:linear-gradient(135deg,#22c55e,#059669);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 8px 24px #05966940">✓</div>
+          <div>
+            <p style="color:#86efac;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px">${actionText}รายชื่อสำเร็จ</p>
+            <p style="color:#fff;font-size:19px;font-weight:700;margin:0;line-height:1.2">${escapeHtml(data.name)}</p>
+          </div>
+        </div>
+        <div style="background:#1e293b;border-radius:16px;overflow:hidden;font-size:13px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
+            <span style="color:#64748b">อีเมล</span>
+            <span style="color:#cbd5e1;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(data.email)}</span>
+          </div>
+          <div style="height:1px;background:#0f172a"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
+            <span style="color:#64748b">เบอร์โทร</span>
+            <span style="color:#cbd5e1">${escapeHtml(data.phone)}</span>
+          </div>
+          <div style="height:1px;background:#0f172a"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
+            <span style="color:#64748b">สถานะ</span>
+            <span style="color:${statusColor};font-weight:700">${statusLabel}</span>
+          </div>
+        </div>
+        ${liffHint}
+      </div>
+    `,
+    background: "#0f172a",
+    color: "#f8fafc",
+    confirmButtonText: inLiff ? "ส่งแชทและปิด &nbsp;→" : "ตกลง",
+    confirmButtonColor: "#22c55e",
+    showConfirmButton: true,
+    timer: inLiff ? 3000 : undefined,
+    timerProgressBar: inLiff,
+    customClass: { popup: "swal-dark-popup", confirmButton: "swal-green-btn" },
+  });
+
+  await sendFlexAndClose(data, isUpdate);
+}
+
+const liffId =
+  new URLSearchParams(window.location.search).get("liffId") ||
+  window.LIFF_ID ||
+  document.querySelector('meta[name="liff-id"]')?.content ||
+  "2010029314-R9ysVoiR";
 
 const toast = Swal.mixin({
   toast: true,
@@ -99,6 +427,133 @@ function getEditFormData() {
     status: editStatusInput.value,
     notes: editNotesInput.value.trim(),
   };
+}
+
+function setLineProfileFallbackVisible(visible) {
+  if (lineProfileFallback) {
+    lineProfileFallback.classList.toggle("hidden", !visible);
+  }
+}
+
+function setLineProfileImage(url) {
+  if (!lineProfileImage) return;
+
+  if (url) {
+    lineProfileImage.src = url;
+    lineProfileImage.classList.remove("hidden");
+    setLineProfileFallbackVisible(false);
+  } else {
+    lineProfileImage.removeAttribute("src");
+    lineProfileImage.classList.add("hidden");
+    setLineProfileFallbackVisible(true);
+  }
+}
+
+function setLineProfileText(profile) {
+  const displayName = cleanText(profile?.displayName || profile?.name || "");
+  const email = cleanText(profile?.email || "");
+
+  if (lineDisplayName) {
+    lineDisplayName.textContent = displayName || "ยังไม่ได้เชื่อมต่อ";
+  }
+  if (lineEmailText) {
+    lineEmailText.textContent = email || "-";
+  }
+  if (lineProfileStatus) {
+    lineProfileStatus.textContent = displayName
+      ? email
+        ? "ดึงข้อมูลโปรไฟล์และอีเมลจาก LINE แล้ว"
+        : "ดึงโปรไฟล์ LINE ได้ แต่ยังไม่เห็นอีเมล"
+      : "รอข้อมูลจาก LIFF";
+  }
+}
+
+function prefillInputsFromLine(profile) {
+  const displayName = cleanText(profile?.displayName || profile?.name || "");
+  const email = cleanText(profile?.email || "").toLowerCase();
+
+  if (displayName && !nameInput.value.trim()) {
+    nameInput.value = displayName;
+  }
+  if (email && !emailInput.value.trim()) {
+    emailInput.value = email;
+  }
+}
+
+async function loadLineProfile() {
+  if (!window.liff) {
+    setLineProfileText(null);
+    if (lineProfileStatus) {
+      lineProfileStatus.textContent = "ไม่พบ LIFF SDK";
+    }
+    return;
+  }
+
+  if (!liffId) {
+    setLineProfileText(null);
+    if (lineProfileStatus) {
+      lineProfileStatus.textContent = "ยังไม่ได้กำหนด LIFF ID";
+    }
+    return;
+  }
+
+  if (lineProfileRefresh) {
+    lineProfileRefresh.disabled = true;
+  }
+
+  try {
+    await window.liff.init({ liffId });
+
+    if (!window.liff.isLoggedIn()) {
+      lineProfileLoaded = false;
+      setLineProfileText(null);
+      if (window.liff.isInClient()) {
+        if (lineProfileStatus) {
+          lineProfileStatus.textContent = "ยังไม่พร้อมดึงข้อมูลใน LINE";
+        }
+        return;
+      }
+
+      if (lineProfileStatus) {
+        lineProfileStatus.textContent = "กำลังเข้าสู่ระบบ LINE...";
+      }
+      window.liff.login({ redirectUri: window.location.href });
+      return;
+    }
+
+    const [profile, token] = await Promise.all([
+      window.liff.getProfile().catch(() => null),
+      Promise.resolve(window.liff.getDecodedIDToken?.() || null),
+    ]);
+
+    const normalizedProfile = {
+      displayName: profile?.displayName || token?.name || token?.displayName || "",
+      email: token?.email || "",
+      pictureUrl: profile?.pictureUrl || token?.pictureUrl || token?.picture || "",
+    };
+
+    lineProfileLoaded = true;
+    setLineProfileText(normalizedProfile);
+    setLineProfileImage(normalizedProfile.pictureUrl);
+    prefillInputsFromLine(normalizedProfile);
+    if (lineProfileStatus) {
+      lineProfileStatus.textContent = normalizedProfile.email
+        ? "โหลดโปรไฟล์ LINE และอีเมลแล้ว"
+        : "โหลดโปรไฟล์ LINE แล้ว แต่ไม่พบอีเมล";
+    }
+  } catch (error) {
+    lineProfileLoaded = false;
+    setLineProfileText(null);
+    if (lineProfileStatus) {
+      lineProfileStatus.textContent = error?.message || "โหลดโปรไฟล์ LINE ไม่สำเร็จ";
+    }
+    setLineProfileImage("");
+  } finally {
+    if (lineProfileRefresh) {
+      lineProfileRefresh.disabled = false;
+    }
+    window.lucide?.createIcons();
+  }
 }
 
 function loadDemoContacts() {
@@ -203,6 +658,10 @@ function openEditModal(contact) {
   document.body.classList.add("overflow-hidden");
   window.lucide?.createIcons();
   requestAnimationFrame(() => editNameInput.focus());
+}
+
+function handleLineProfileRefresh() {
+  loadLineProfile();
 }
 
 function switchToDemoMode(error) {
@@ -401,18 +860,18 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  const isUpdate = !!contactId.value;
   setSaving(true);
 
   try {
     if (useDemoStorage) {
       const now = new Date().toISOString();
-      if (contactId.value) {
+      if (isUpdate) {
         saveDemoContacts(
           contacts.map((contact) =>
             contact.id === contactId.value ? { ...contact, ...data, updatedAt: now } : contact,
           ),
         );
-        toast.fire({ icon: "success", title: "อัปเดตรายชื่อแล้ว" });
       } else {
         saveDemoContacts([
           {
@@ -423,23 +882,21 @@ form.addEventListener("submit", async (event) => {
           },
           ...contacts,
         ]);
-        toast.fire({ icon: "success", title: "เพิ่มรายชื่อแล้ว" });
       }
-    } else if (contactId.value) {
+    } else if (isUpdate) {
       await update(ref(db, `contacts/${contactId.value}`), {
         ...data,
         updatedAt: serverTimestamp(),
       });
-      toast.fire({ icon: "success", title: "อัปเดตรายชื่อแล้ว" });
     } else {
       await push(contactsRef, {
         ...data,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      toast.fire({ icon: "success", title: "เพิ่มรายชื่อแล้ว" });
     }
     resetForm();
+    await showSaveSuccessAndClose(data, isUpdate);
   } catch (error) {
     Swal.fire("บันทึกไม่สำเร็จ", error.message, "error");
   } finally {
@@ -474,7 +931,7 @@ editForm?.addEventListener("submit", async (event) => {
       });
     }
     closeEditModal();
-    toast.fire({ icon: "success", title: "อัปเดตรายชื่อแล้ว" });
+    await showSaveSuccessAndClose(data, true);
   } catch (error) {
     Swal.fire("บันทึกไม่สำเร็จ", error.message, "error");
   } finally {
@@ -496,6 +953,9 @@ contactsTable.addEventListener("click", (event) => {
 });
 
 resetButton.addEventListener("click", resetForm);
+lineProfileRefresh?.addEventListener("click", handleLineProfileRefresh);
+lineProfileImage?.addEventListener("load", () => setLineProfileFallbackVisible(false));
+lineProfileImage?.addEventListener("error", () => setLineProfileImage(""));
 editSheetBackdrop?.addEventListener("click", closeEditModal);
 closeEditSheet?.addEventListener("click", closeEditModal);
 cancelEditButton?.addEventListener("click", closeEditModal);
@@ -508,6 +968,7 @@ searchInput.addEventListener("input", renderContacts);
 statusFilter.addEventListener("change", renderContacts);
 captchaSlider?.addEventListener("input", verifyCaptchaProgress);
 resetCaptcha();
+loadLineProfile();
 
 onValue(
   contactsRef,
