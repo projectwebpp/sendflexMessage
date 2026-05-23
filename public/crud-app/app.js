@@ -318,7 +318,7 @@ function buildFlexMessage(data, actionType = "create") {
                     color: "#d1fae5",
                     size: "xxs",
                     weight: "bold",
-                  },c
+                  },
                   {
                     type: "text",
                     text: actionText,
@@ -766,13 +766,13 @@ function handleLineProfileRefresh() {
 }
 
 function switchToDemoMode(error) {
+  hideLoadingOverlay();
   useDemoStorage = true;
   contacts = loadDemoContacts();
-  renderContacts();
-  hideLoadingOverlay();
+  try { renderContacts(); } catch { /* noop */ }
   Swal.fire(
     "เชื่อมต่อฐานข้อมูลไม่สำเร็จ",
-    `${error.message} ระบบจะเปลี่ยนไปใช้โหมดทดลองในเบราว์เซอร์นี้ก่อน`,
+    `${error?.message || "ไม่สามารถเชื่อมต่อได้"} ระบบจะเปลี่ยนไปใช้โหมดทดลองในเบราว์เซอร์นี้ก่อน`,
     "error",
   );
 }
@@ -1228,8 +1228,8 @@ searchInput.addEventListener("input", renderContacts);
 statusFilter.addEventListener("change", renderContacts);
 captchaSlider?.addEventListener("input", verifyCaptchaProgress);
 resetCaptcha();
-loadLineProfile();
 
+// ลงทะเบียน Firebase listener ก่อน จากนั้นค่อยโหลด LIFF
 onValue(
   contactsRef,
   (snapshot) => {
@@ -1245,3 +1245,8 @@ onValue(
   },
   switchToDemoMode,
 );
+
+// Safety net: ซ่อน loading หลัง 6 วินาทีในทุกกรณี
+setTimeout(hideLoadingOverlay, 6000);
+
+loadLineProfile();

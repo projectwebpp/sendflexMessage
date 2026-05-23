@@ -78,6 +78,18 @@
         visibility: hidden;
       }
 
+      /* CSS fallback: ซ่อน loading อัตโนมัติหลัง 8 วินาที ไม่พึ่ง JS */
+      @keyframes force-hide {
+        0%, 94% { opacity: 1; visibility: visible; pointer-events: auto; }
+        100%     { opacity: 0; visibility: hidden;  pointer-events: none;  }
+      }
+      #loadingOverlay {
+        animation: force-hide 8.5s ease forwards;
+      }
+      #loadingOverlay.is-hidden {
+        animation: none;
+      }
+
       .bottom-sheet {
         opacity: 1;
         pointer-events: auto;
@@ -613,7 +625,7 @@
       </form>
     </div>
 
-    <script type="module" src="./app.js?v=20260523-liff-profile"></script>
+    <script type="module" src="./app.js?v=20260523-fix-syntax"></script>
     <script>
       window.addEventListener("DOMContentLoaded", () => {
         lucide.createIcons();
