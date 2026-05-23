@@ -42,10 +42,26 @@ const emptyState = document.querySelector("#emptyState");
 const totalCount = document.querySelector("#totalCount");
 const activeCount = document.querySelector("#activeCount");
 const inactiveCount = document.querySelector("#inactiveCount");
+const statusPieChart = document.querySelector("#statusPieChart");
+const pieActivePercent = document.querySelector("#pieActivePercent");
+const pieActiveLabel = document.querySelector("#pieActiveLabel");
+const pieInactiveLabel = document.querySelector("#pieInactiveLabel");
 const loadingOverlay = document.querySelector("#loadingOverlay");
 const captchaSlider = document.querySelector("#captchaSlider");
 const captchaStatus = document.querySelector("#captchaStatus");
 const captchaValue = document.querySelector("#captchaValue");
+const editSheet = document.querySelector("#editSheet");
+const editSheetBackdrop = document.querySelector("#editSheetBackdrop");
+const editForm = document.querySelector("#editForm");
+const closeEditSheet = document.querySelector("#closeEditSheet");
+const cancelEditButton = document.querySelector("#cancelEditButton");
+const saveEditButton = document.querySelector("#saveEditButton");
+const editContactId = document.querySelector("#editContactId");
+const editNameInput = document.querySelector("#editName");
+const editEmailInput = document.querySelector("#editEmail");
+const editPhoneInput = document.querySelector("#editPhone");
+const editStatusInput = document.querySelector("#editStatus");
+const editNotesInput = document.querySelector("#editNotes");
 
 let contacts = [];
 let useDemoStorage = false;
@@ -72,6 +88,16 @@ function getFormData() {
     phone: cleanText(phoneInput.value),
     status: statusInput.value,
     notes: notesInput.value.trim(),
+  };
+}
+
+function getEditFormData() {
+  return {
+    name: cleanText(editNameInput.value),
+    email: cleanText(editEmailInput.value).toLowerCase(),
+    phone: cleanText(editPhoneInput.value),
+    status: editStatusInput.value,
+    notes: editNotesInput.value.trim(),
   };
 }
 
@@ -151,6 +177,34 @@ function resetForm() {
   nameInput.focus();
 }
 
+function setEditSaving(isSaving) {
+  saveEditButton.disabled = isSaving;
+  saveEditButton.textContent = isSaving ? "กำลังบันทึก..." : "บันทึกการแก้ไข";
+}
+
+function closeEditModal() {
+  editSheet?.classList.add("is-hidden");
+  editSheet?.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("overflow-hidden");
+  editForm?.reset();
+  if (editContactId) editContactId.value = "";
+  setEditSaving(false);
+}
+
+function openEditModal(contact) {
+  editContactId.value = contact.id;
+  editNameInput.value = contact.name || "";
+  editEmailInput.value = contact.email || "";
+  editPhoneInput.value = contact.phone || "";
+  editStatusInput.value = contact.status || "active";
+  editNotesInput.value = contact.notes || "";
+  editSheet?.classList.remove("is-hidden");
+  editSheet?.setAttribute("aria-hidden", "false");
+  document.body.classList.add("overflow-hidden");
+  window.lucide?.createIcons();
+  requestAnimationFrame(() => editNameInput.focus());
+}
+
 function switchToDemoMode(error) {
   useDemoStorage = true;
   contacts = loadDemoContacts();
@@ -165,9 +219,17 @@ function switchToDemoMode(error) {
 
 function updateCounts() {
   const active = contacts.filter((contact) => contact.status === "active").length;
+  const inactive = contacts.length - active;
+  const activeRatio = contacts.length ? active / contacts.length : 0;
+  const activePercent = Math.round(activeRatio * 100);
+
   totalCount.textContent = contacts.length;
   activeCount.textContent = active;
-  inactiveCount.textContent = contacts.length - active;
+  inactiveCount.textContent = inactive;
+  statusPieChart?.style.setProperty("--active-deg", `${activeRatio * 360}deg`);
+  if (pieActivePercent) pieActivePercent.textContent = `${activePercent}%`;
+  if (pieActiveLabel) pieActiveLabel.textContent = `${active} รายชื่อ`;
+  if (pieInactiveLabel) pieInactiveLabel.textContent = `${inactive} รายชื่อ`;
 }
 
 function escapeHtml(value = "") {
@@ -288,18 +350,7 @@ function editContact(id) {
   const contact = contacts.find((item) => item.id === id);
   if (!contact) return;
 
-  contactId.value = contact.id;
-  nameInput.value = contact.name;
-  emailInput.value = contact.email;
-  phoneInput.value = contact.phone;
-  statusInput.value = contact.status;
-  notesInput.value = contact.notes || "";
-  formTitle.textContent = "แก้ไขรายชื่อ";
-  submitButton.textContent = "อัปเดตรายชื่อ";
-  resetButton.classList.remove("hidden");
-  resetCaptcha();
-  form.scrollIntoView({ behavior: "smooth", block: "start" });
-  nameInput.focus();
+  openEditModal(contact);
 }
 
 async function deleteContact(id) {
@@ -396,6 +447,41 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
+editForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const id = editContactId.value;
+  const data = getEditFormData();
+  if (!id) return;
+
+  if (!data.name || !data.email || !data.phone || !data.status) {
+    Swal.fire("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน", "info");
+    return;
+  }
+
+  setEditSaving(true);
+
+  try {
+    if (useDemoStorage) {
+      const now = new Date().toISOString();
+      saveDemoContacts(
+        contacts.map((contact) => (contact.id === id ? { ...contact, ...data, updatedAt: now } : contact)),
+      );
+    } else {
+      await update(ref(db, `contacts/${id}`), {
+        ...data,
+        updatedAt: serverTimestamp(),
+      });
+    }
+    closeEditModal();
+    toast.fire({ icon: "success", title: "อัปเดตรายชื่อแล้ว" });
+  } catch (error) {
+    Swal.fire("บันทึกไม่สำเร็จ", error.message, "error");
+  } finally {
+    setEditSaving(false);
+  }
+});
+
 contactsTable.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-id]");
   if (!button) return;
@@ -410,6 +496,14 @@ contactsTable.addEventListener("click", (event) => {
 });
 
 resetButton.addEventListener("click", resetForm);
+editSheetBackdrop?.addEventListener("click", closeEditModal);
+closeEditSheet?.addEventListener("click", closeEditModal);
+cancelEditButton?.addEventListener("click", closeEditModal);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !editSheet?.classList.contains("is-hidden")) {
+    closeEditModal();
+  }
+});
 searchInput.addEventListener("input", renderContacts);
 statusFilter.addEventListener("change", renderContacts);
 captchaSlider?.addEventListener("input", verifyCaptchaProgress);
