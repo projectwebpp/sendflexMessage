@@ -22,37 +22,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const contactsRef = ref(db, "contacts");
 const demoStorageKey = "crud-app-demo-contacts";
-
-function startDatabaseSync(userId) {
-  if (!userId) return;
-
-  // ยกเลิก Listener เดิมถ้ามี
-  if (databaseListener) {
-    // ใน Firebase JS SDK 9+ การยกเลิกคือการเรียกฟังก์ชันที่ onValue คืนมา
-    // แต่เราจะเก็บไว้เป็น reference เพื่อเช็คสถานะเฉยๆ
-  }
-
-  const userContactsRef = ref(db, `contacts/${userId}`);
-
-  onValue(
-    userContactsRef,
-    (snapshot) => {
-      const data = snapshot.val() || {};
-      contacts = Object.entries(data)
-        .map(([id, contact]) => ({
-          id,
-          ...contact,
-        }))
-        .sort((a, b) => getTimeValue(b.createdAt) - getTimeValue(a.createdAt));
-      renderContacts();
-      hideLoadingOverlay();
-    },
-    switchToDemoMode,
-  );
-}
-
-loadLineProfile();
 
 const form = document.querySelector("#contactForm");
 const formTitle = document.querySelector("#formTitle");
@@ -112,7 +83,6 @@ let useDemoStorage = false;
 let captchaVerified = false;
 let lineProfileLoaded = false;
 let currentUserId = null;
-let databaseListener = null;
 
 function buildFlexMessage(data, actionType = "create") {
   const isActive = data.status === "active";
