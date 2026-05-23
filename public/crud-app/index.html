@@ -356,6 +356,28 @@
               ></textarea>
             </label>
 
+            <div class="block">
+              <span class="text-sm font-medium text-slate-300">รูปถ่ายผู้ติดต่อ (JPG/PNG, สูงสุด 10MB)</span>
+              <div class="mt-1 flex items-center gap-4">
+                <div id="imagePreview" class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-slate-700 bg-slate-950/50 text-slate-500 overflow-hidden">
+                  <i data-lucide="image" class="h-6 w-6"></i>
+                </div>
+                <div class="relative flex-1">
+                  <input
+                    id="contactImage"
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    class="sr-only"
+                  />
+                  <label for="contactImage" class="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-slate-800 active:scale-95">
+                    <i data-lucide="upload" class="h-4 w-4"></i>
+                    เลือกรูปภาพ
+                  </label>
+                  <p id="imageFileName" class="mt-1 truncate text-xs text-slate-500">ยังไม่ได้เลือกไฟล์</p>
+                </div>
+              </div>
+            </div>
+
             <div class="rounded-3xl border border-slate-700 bg-slate-950/60 p-4">
               <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -538,6 +560,28 @@
               class="mt-1 w-full resize-none rounded-2xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
             ></textarea>
           </label>
+
+          <div class="block">
+            <span class="text-sm font-medium text-slate-300">แก้ไขรูปถ่าย (JPG/PNG, สูงสุด 10MB)</span>
+            <div class="mt-1 flex items-center gap-4">
+              <div id="editImagePreview" class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-slate-700 bg-slate-900/50 text-slate-500 overflow-hidden">
+                <i data-lucide="image" class="h-6 w-6"></i>
+              </div>
+              <div class="relative flex-1">
+                <input
+                  id="editContactImage"
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  class="sr-only"
+                />
+                <label for="editContactImage" class="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-slate-800 active:scale-95">
+                  <i data-lucide="upload" class="h-4 w-4"></i>
+                  เปลี่ยนรูปภาพ
+                </label>
+                <p id="editImageFileName" class="mt-1 truncate text-xs text-slate-500">ยังไม่ได้เลือกไฟล์ใหม่</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="mt-5 grid grid-cols-[0.8fr_1.2fr] gap-3">

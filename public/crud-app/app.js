@@ -22,8 +22,37 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const contactsRef = ref(db, "contacts");
 const demoStorageKey = "crud-app-demo-contacts";
+
+function startDatabaseSync(userId) {
+  if (!userId) return;
+
+  // ยกเลิก Listener เดิมถ้ามี
+  if (databaseListener) {
+    // ใน Firebase JS SDK 9+ การยกเลิกคือการเรียกฟังก์ชันที่ onValue คืนมา
+    // แต่เราจะเก็บไว้เป็น reference เพื่อเช็คสถานะเฉยๆ
+  }
+
+  const userContactsRef = ref(db, `contacts/${userId}`);
+
+  onValue(
+    userContactsRef,
+    (snapshot) => {
+      const data = snapshot.val() || {};
+      contacts = Object.entries(data)
+        .map(([id, contact]) => ({
+          id,
+          ...contact,
+        }))
+        .sort((a, b) => getTimeValue(b.createdAt) - getTimeValue(a.createdAt));
+      renderContacts();
+      hideLoadingOverlay();
+    },
+    switchToDemoMode,
+  );
+}
+
+loadLineProfile();
 
 const form = document.querySelector("#contactForm");
 const formTitle = document.querySelector("#formTitle");
@@ -68,11 +97,22 @@ const lineDisplayName = document.querySelector("#lineDisplayName");
 const lineEmailText = document.querySelector("#lineEmailText");
 const lineProfileStatus = document.querySelector("#lineProfileStatus");
 const lineProfileRefresh = document.querySelector("#lineProfileRefresh");
+const contactImageInput = document.querySelector("#contactImage");
+const imagePreview = document.querySelector("#imagePreview");
+const imageFileName = document.querySelector("#imageFileName");
+const editContactImageInput = document.querySelector("#editContactImage");
+const editImagePreview = document.querySelector("#editImagePreview");
+const editImageFileName = document.querySelector("#editImageFileName");
+
+const IMGBB_API_KEY = "6d207e02198a847aa98d0a2a901485a5";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzMLyKOWlLEkAC1tUTp3oW69c3Q2Xim1OPYsq8_AJmXEQP2OAaXMLJb7L4m1KqBY56v/exec";
 
 let contacts = [];
 let useDemoStorage = false;
 let captchaVerified = false;
 let lineProfileLoaded = false;
+let currentUserId = null;
+let databaseListener = null;
 
 function buildFlexMessage(data, actionType = "create") {
   const isActive = data.status === "active";
@@ -97,7 +137,20 @@ function buildFlexMessage(data, actionType = "create") {
     minute: "2-digit",
   });
 
-  const infoRows = [
+  const infoRows = [];
+
+  // เพิ่มรูปภาพใน Flex Message ถ้ามี
+  const heroImage = data.imageUrl
+    ? {
+        type: "image",
+        url: data.imageUrl,
+        size: "full",
+        aspectRatio: "20:13",
+        aspectMode: "cover",
+      }
+    : null;
+
+  infoRows.push(
     {
       icon: "👤",
       label: "ชื่อ-นามสกุล",
@@ -119,7 +172,7 @@ function buildFlexMessage(data, actionType = "create") {
       value: data.phone,
       valueColor: "#94a3b8",
     },
-  ];
+  );
 
   if (data.notes) {
     infoRows.push({
@@ -272,6 +325,7 @@ function buildFlexMessage(data, actionType = "create") {
     contents: {
       type: "bubble",
       size: "mega",
+      hero: heroImage || undefined,
       header: {
         type: "box",
         layout: "vertical",
@@ -395,6 +449,13 @@ async function showSaveSuccessAndClose(data, isUpdate = false) {
             <p style="color:#fff;font-size:20px;font-weight:700;margin:0;line-height:1.2">${escapeHtml(data.name)}</p>
           </div>
         </div>
+        ${
+          data.imageUrl
+            ? `<div style="margin-bottom:16px;border-radius:16px;overflow:hidden;border:1px solid #334155;height:180px">
+                <img src="${data.imageUrl}" style="width:100%;height:100%;object-fit:cover" alt="รูปผู้ติดต่อ">
+               </div>`
+            : ""
+        }
         <div style="background:#1e293b;border-radius:16px;overflow:hidden;font-size:13px;border:1px solid #334155">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px">
             <span style="color:#64748b;display:flex;align-items:center;gap:6px">✉ อีเมล</span>
@@ -574,6 +635,8 @@ async function loadLineProfile() {
       pictureUrl: profile?.pictureUrl || token?.pictureUrl || token?.picture || "",
     };
 
+    currentUserId = profile?.userId || token?.sub || null;
+
     lineProfileLoaded = true;
     setLineProfileText(normalizedProfile);
     setLineProfileImage(normalizedProfile.pictureUrl);
@@ -671,6 +734,14 @@ function resetForm() {
   submitButton.textContent = "บันทึกรายชื่อ";
   resetButton.classList.add("hidden");
   resetCaptcha();
+
+  // รีเซ็ตรูปภาพ
+  if (imageFileName) imageFileName.textContent = "ยังไม่ได้เลือกไฟล์";
+  if (imagePreview) {
+    imagePreview.innerHTML = `<i data-lucide="image" class="h-6 w-6"></i>`;
+    window.lucide?.createIcons();
+  }
+
   nameInput.focus();
 }
 
@@ -684,6 +755,14 @@ function closeEditModal() {
   editSheet?.setAttribute("aria-hidden", "true");
   document.body.classList.remove("overflow-hidden");
   editForm?.reset();
+
+  // รีเซ็ตรูปภาพในโหมดแก้ไข
+  if (editImageFileName) editImageFileName.textContent = "ยังไม่ได้เลือกไฟล์ใหม่";
+  if (editImagePreview) {
+    editImagePreview.innerHTML = `<i data-lucide="image" class="h-6 w-6"></i>`;
+    window.lucide?.createIcons();
+  }
+
   if (editContactId) editContactId.value = "";
   setEditSaving(false);
 }
@@ -695,6 +774,16 @@ function openEditModal(contact) {
   editPhoneInput.value = contact.phone || "";
   editStatusInput.value = contact.status || "active";
   editNotesInput.value = contact.notes || "";
+
+  // แสดงรูปเดิมใน preview (ถ้ามี)
+  if (contact.imageUrl) {
+    editImagePreview.innerHTML = `<img src="${contact.imageUrl}" class="w-full h-full object-cover">`;
+  } else {
+    editImagePreview.innerHTML = `<i data-lucide="image" class="h-6 w-6"></i>`;
+    window.lucide?.createIcons();
+  }
+  editImageFileName.textContent = "ยังไม่ได้เลือกไฟล์ใหม่";
+
   editSheet?.classList.remove("is-hidden");
   editSheet?.setAttribute("aria-hidden", "false");
   document.body.classList.add("overflow-hidden");
@@ -780,8 +869,14 @@ function renderContacts() {
           <div class="h-1.5 ${isActive ? "bg-emerald-400" : "bg-amber-300"}"></div>
           <div class="p-4">
             <div class="flex items-start gap-3">
-              <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-300 to-cyan-300 text-base font-semibold text-slate-950 shadow-lg shadow-emerald-950/30">
-                ${escapeHtml(getInitials(contact.name))}
+              <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-slate-800 overflow-hidden shadow-lg shadow-emerald-950/30">
+                ${
+                  contact.imageUrl
+                    ? `<img src="${contact.imageUrl}" class="h-full w-full object-cover">`
+                    : `<span class="bg-gradient-to-br from-emerald-300 to-cyan-300 w-full h-full flex items-center justify-center text-slate-950 font-semibold">${escapeHtml(
+                        getInitials(contact.name),
+                      )}</span>`
+                }
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-2">
@@ -820,25 +915,31 @@ function renderContacts() {
                 <i data-lucide="phone-call" class="h-4 w-4"></i>
                 โทร
               </a>
-              <div class="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  class="edit-button flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700 bg-slate-950/70 text-slate-200 transition active:scale-95"
-                  data-id="${contact.id}"
-                  title="แก้ไข"
-                >
-                  <i data-lucide="pencil" class="h-4 w-4 pointer-events-none"></i>
-                </button>
-                <button
-                  type="button"
-                  class="delete-button flex h-11 w-11 items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/10 text-red-300 transition active:scale-95"
-                  data-id="${contact.id}"
-                  title="ลบ"
-                >
-                  <i data-lucide="trash-2" class="h-4 w-4 pointer-events-none"></i>
-                </button>
-              </div>
-            </div>
+              ${
+                currentUserId && contact.ownerUid === currentUserId
+                  ? `<div class="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        class="edit-button flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700 bg-slate-950/70 text-slate-200 transition active:scale-95"
+                        data-id="${contact.id}"
+                        title="แก้ไข"
+                      >
+                        <i data-lucide="pencil" class="h-4 w-4 pointer-events-none"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="delete-button flex h-11 w-11 items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/10 text-red-300 transition active:scale-95"
+                        data-id="${contact.id}"
+                        title="ลบ"
+                      >
+                        <i data-lucide="trash-2" class="h-4 w-4 pointer-events-none"></i>
+                      </button>
+                    </div>`
+                  : `<span class="flex items-center gap-1.5 rounded-2xl border border-slate-700/50 bg-slate-900/50 px-3 py-2 text-xs text-slate-500">
+                      <i data-lucide="eye" class="h-3.5 w-3.5 pointer-events-none"></i>
+                      ดูได้อย่างเดียว
+                    </span>`
+              }
           </div>
         </article>
       `;
@@ -851,12 +952,36 @@ function editContact(id) {
   const contact = contacts.find((item) => item.id === id);
   if (!contact) return;
 
+  if (!currentUserId || contact.ownerUid !== currentUserId) {
+    Swal.fire({
+      title: "ไม่มีสิทธิ์แก้ไข",
+      text: "คุณสามารถแก้ไขได้เฉพาะรายชื่อที่คุณสร้างเองเท่านั้น",
+      icon: "warning",
+      background: "#0f172a",
+      color: "#f8fafc",
+      confirmButtonColor: "#22c55e",
+    });
+    return;
+  }
+
   openEditModal(contact);
 }
 
 async function deleteContact(id) {
   const contact = contacts.find((item) => item.id === id);
   if (!contact) return;
+
+  if (!currentUserId || contact.ownerUid !== currentUserId) {
+    Swal.fire({
+      title: "ไม่มีสิทธิ์ลบ",
+      text: "คุณสามารถลบได้เฉพาะรายชื่อที่คุณสร้างเองเท่านั้น",
+      icon: "warning",
+      background: "#0f172a",
+      color: "#f8fafc",
+      confirmButtonColor: "#22c55e",
+    });
+    return;
+  }
 
   const result = await Swal.fire({
     title: "ลบรายชื่อนี้?",
@@ -879,6 +1004,15 @@ async function deleteContact(id) {
     } else {
       await remove(ref(db, `contacts/${id}`));
     }
+
+    // ลบไฟล์ใน Google Drive (ถ้ามี)
+    if (contact.driveFileId) {
+      fetch(`${GAS_URL}?action=deleteFile`, {
+        method: "POST",
+        body: JSON.stringify({ fileId: contact.driveFileId }),
+      }).catch((err) => console.warn("[GAS] delete file error:", err));
+    }
+
     if (contactId.value === id) resetForm();
     toast.fire({ icon: "success", title: "ลบรายชื่อแล้ว" });
 
@@ -896,6 +1030,85 @@ async function deleteContact(id) {
     Swal.fire("ลบไม่สำเร็จ", error.message, "error");
   }
 }
+
+async function uploadImage(file, contactName = "") {
+  if (!file) return null;
+
+  // ตรวจสอบขนาดไฟล์ (10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("ขนาดไฟล์เกิน 10MB");
+  }
+
+  // ตรวจสอบประเภทไฟล์
+  const allowedTypes = ["image/jpeg", "image/png"];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("รองรับเฉพาะไฟล์ JPG และ PNG เท่านั้น");
+  }
+
+  // แปลงไฟล์เป็น Base64
+  const base64String = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+
+  try {
+    const response = await fetch(`${GAS_URL}?action=uploadImage`, {
+      method: "POST",
+      body: JSON.stringify({
+        source: base64String,
+        contactName: contactName,
+        fileName: file.name,
+        contentType: file.type,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (result.ok) {
+      return {
+        url: result.medium || result.url,
+        driveFileId: result.driveFileId,
+      };
+    } else {
+      throw new Error(result.error || "อัปโหลดรูปภาพไม่สำเร็จ");
+    }
+  } catch (err) {
+    console.error("[GAS Upload Error]", err);
+    throw new Error("ไม่สามารถเชื่อมต่อระบบอัปโหลดได้: " + err.message);
+  }
+}
+
+function handleImageSelect(input, preview, fileName, isEdit = false) {
+  const file = input.files[0];
+  if (file) {
+    // แสดงชื่อไฟล์
+    fileName.textContent = file.name;
+
+    // แสดง Preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    fileName.textContent = isEdit ? "ยังไม่ได้เลือกไฟล์ใหม่" : "ยังไม่ได้เลือกไฟล์";
+    preview.innerHTML = `<i data-lucide="image" class="h-6 w-6"></i>`;
+    window.lucide?.createIcons();
+  }
+}
+
+contactImageInput?.addEventListener("change", () => {
+  handleImageSelect(contactImageInput, imagePreview, imageFileName);
+});
+
+editContactImageInput?.addEventListener("change", () => {
+  handleImageSelect(editContactImageInput, editImagePreview, editImageFileName, true);
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -917,6 +1130,14 @@ form.addEventListener("submit", async (event) => {
   setSaving(true);
 
   try {
+    // อัปโหลดรูปภาพถ้ามีการเลือกไฟล์
+    const file = contactImageInput.files[0];
+    if (file) {
+      const uploadResult = await uploadImage(file, data.name);
+      data.imageUrl = uploadResult.url;
+      data.driveFileId = uploadResult.driveFileId;
+    }
+
     if (useDemoStorage) {
       const now = new Date().toISOString();
       if (isUpdate) {
@@ -944,6 +1165,7 @@ form.addEventListener("submit", async (event) => {
     } else {
       await push(contactsRef, {
         ...data,
+        ownerUid: currentUserId || "anonymous",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -972,6 +1194,21 @@ editForm?.addEventListener("submit", async (event) => {
   setEditSaving(true);
 
   try {
+    // อัปโหลดรูปภาพใหม่ถ้ามีการเลือกไฟล์
+    const file = editContactImageInput.files[0];
+    if (file) {
+      const uploadResult = await uploadImage(file, data.name);
+      data.imageUrl = uploadResult.url;
+      data.driveFileId = uploadResult.driveFileId;
+    } else {
+      // ถ้าไม่ได้เลือกรูปใหม่ ให้ใช้รูปเดิม (ถ้ามี)
+      const existingContact = contacts.find((c) => c.id === id);
+      if (existingContact?.imageUrl) {
+        data.imageUrl = existingContact.imageUrl;
+        data.driveFileId = existingContact.driveFileId;
+      }
+    }
+
     if (useDemoStorage) {
       const now = new Date().toISOString();
       saveDemoContacts(
