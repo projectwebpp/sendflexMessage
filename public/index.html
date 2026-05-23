@@ -4,134 +4,157 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>LINE Flex Broadcaster</title>
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
+/* ========== VARIABLES & RESET ========== */
 :root{
-  --bg:#0d0d0f;--sf:#17171b;--sf2:#1f1f25;--sf3:#27272f;
-  --b:rgba(255,255,255,.08);--b2:rgba(255,255,255,.14);
-  --tx:#f0f0f2;--tx2:#9898a6;--tx3:#4a4a5a;
-  --gr:#00e676;--gd:rgba(0,230,118,.1);
-  --bl:#4da6ff;--bd:rgba(77,166,255,.1);
-  --rd:#ff5252;--rdd:rgba(255,82,82,.1);
-  --am:#ffab40;--ad:rgba(255,171,64,.1);
-  --pu:#ce93d8;--pd:rgba(206,147,216,.1);
+  --bg:#0d0d0f; --sf:#17171b; --sf2:#1f1f25; --sf3:#27272f;
+  --b:rgba(255,255,255,.08); --b2:rgba(255,255,255,.14);
+  --tx:#f0f0f2; --tx2:#9898a6; --tx3:#4a4a5a;
+  --gr:#00e676; --gd:rgba(0,230,118,.1);
+  --bl:#4da6ff; --bd:rgba(77,166,255,.1);
+  --rd:#ff5252; --rdd:rgba(255,82,82,.1);
+  --am:#ffab40; --ad:rgba(255,171,64,.1);
+  --pu:#ce93d8; --pd:rgba(206,147,216,.1);
   --fn:'IBM Plex Sans Thai',sans-serif;
   --mo:'JetBrains Mono',monospace;
-  --r:14px;--rs:8px;--rx:6px;
+  --r:14px; --rs:8px; --rx:6px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh;padding-bottom:3rem;-webkit-font-smoothing:antialiased;}
-#ls{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
-#ls.hide{opacity:0;pointer-events:none;}
-.ll{width:56px;height:56px;background:linear-gradient(135deg,#00c300,#00e676);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 30px rgba(0,230,118,.35);animation:pop .5s cubic-bezier(.34,1.56,.64,1);}
-@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-.lsub{font-size:12px;color:var(--tx2);}.lbw{width:180px;height:3px;background:var(--sf3);border-radius:2px;overflow:hidden;}
-.lb{height:100%;width:0%;background:linear-gradient(90deg,#00b300,#00e676);border-radius:2px;transition:width .4s;}
-.hdr{position:sticky;top:0;z-index:200;background:rgba(13,13,15,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--b);padding:.85rem 1.1rem;display:flex;align-items:center;gap:10px;}
-.logo{width:34px;height:34px;background:linear-gradient(135deg,#00c300,#00e676);border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 16px rgba(0,230,118,.28);}
-.ht h1{font-size:15px;font-weight:600;letter-spacing:-.3px;}.ht p{font-size:10px;color:var(--tx2);margin-top:1px;}
-.hr{margin-left:auto;display:flex;align-items:center;gap:7px;}
-.pill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:opacity .2s;}
-.pill:active{opacity:.7;}
-.pg{background:var(--gd);border-color:rgba(0,230,118,.22);color:var(--gr);}
-.pa{background:var(--ad);border-color:rgba(255,171,64,.22);color:var(--am);}
-.pr{background:var(--rdd);border-color:rgba(255,82,82,.22);color:var(--rd);}
-.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.wrap{padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;}
-.card{background:var(--sf);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;}
-.ch{padding:.75rem 1rem;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--b);background:var(--sf2);}
-.ci{width:26px;height:26px;border-radius:var(--rx);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
-.cib{background:var(--bd);color:var(--bl);}.cig{background:var(--gd);color:var(--gr);}
-.cia{background:var(--ad);color:var(--am);}.cip{background:var(--pd);color:var(--pu);}
-.ch h2{font-size:12.5px;font-weight:600;}
-.badge{margin-left:auto;font-size:10px;padding:2px 7px;border-radius:10px;background:var(--sf3);color:var(--tx2);white-space:nowrap;}
-.cb{padding:.9rem 1rem;}
-.field{margin-bottom:.8rem;}.field:last-child{margin-bottom:0;}
-label{display:block;font-size:11px;font-weight:500;color:var(--tx2);margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase;}
-input[type=text],input[type=number]{width:100%;background:var(--sf3);border:1px solid var(--b2);border-radius:var(--rs);color:var(--tx);font-family:var(--mo);font-size:12.5px;padding:9px 11px;outline:none;}
-input:focus{border-color:var(--bl);box-shadow:0 0 0 3px rgba(77,166,255,.14);}
-textarea{width:100%;background:var(--sf3);border:1px solid var(--b2);border-radius:var(--rs);color:var(--tx);font-family:var(--mo);font-size:11.5px;padding:9px 11px;outline:none;resize:vertical;min-height:200px;line-height:1.65;}
-textarea:focus{border-color:var(--bl);box-shadow:0 0 0 3px rgba(77,166,255,.14);}
-.srow{display:flex;align-items:center;gap:10px;margin-top:6px;}
-input[type=range]{flex:1;height:3px;background:var(--sf3);border-radius:2px;}
-input[type=range]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%;background:var(--bl);cursor:pointer;}
-.sv{font-family:var(--mo);font-size:12px;font-weight:500;color:var(--bl);min-width:50px;text-align:right;}
-.stats{display:flex;gap:7px;margin-bottom:.9rem;}
-.stat{flex:1;background:var(--sf2);border:1px solid var(--b);border-radius:var(--rs);padding:9px 10px;text-align:center;}
-.stv{font-size:17px;font-weight:600;font-family:var(--mo);}
-.stl{font-size:10px;color:var(--tx2);margin-top:2px;text-transform:uppercase;}
-.jtb{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
-.jb{background:var(--sf3);border:1px solid var(--b);border-radius:var(--rx);color:var(--tx2);font-size:11px;padding:5px 9px;cursor:pointer;}
-.jb:hover{border-color:var(--b2);color:var(--tx);}
-.jst{display:flex;align-items:center;gap:5px;font-size:11px;margin-top:5px;color:var(--tx3);}
-.jst.ok{color:var(--gr);}.jst.err{color:var(--rd);}
-.jsd{width:5px;height:5px;border-radius:50%;background:currentColor;}
-.tab-row{display:flex;gap:4px;padding:7px 9px;border-bottom:1px solid var(--b);background:var(--sf2);}
-.tab{flex:1;background:none;border:1px solid transparent;border-radius:var(--rx);padding:5px 4px;font-size:11px;color:var(--tx2);cursor:pointer;text-align:center;}
-.tab.active{background:var(--sf3);border-color:var(--b2);color:var(--tx);}
-.tp{display:none;}.tp.active{display:block;}
-.steps{display:flex;margin-bottom:1rem;}
-.si{flex:1;text-align:center;padding:8px 4px;font-size:11px;color:var(--tx3);border-bottom:2px solid var(--b);transition:all .2s;}
-.si.done{color:var(--gr);border-color:var(--gr);}
-.si.active{color:var(--bl);border-color:var(--bl);font-weight:600;}
-.sbtn{width:100%;padding:13px;border:none;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;}
-.sbtn:last-child{margin-bottom:0;}
-.sbtn:active{transform:scale(.98);}
-.sbtn:disabled{opacity:.35;cursor:not-allowed;}
-.bs{background:linear-gradient(135deg,#1565c0,#4da6ff);color:#fff;}
-.bb{background:linear-gradient(135deg,#00b300,#00e676);color:#001800;}
-.bst{background:linear-gradient(135deg,#cc2200,#ff5252);color:#fff;}
-.sp{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:none;}
-.sp2{border-color:rgba(0,0,0,.2);border-top-color:#001800;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.prog-wrap{background:var(--sf3);border-radius:3px;height:3px;overflow:hidden;margin-bottom:10px;display:none;}
-.prog-bar{height:100%;width:0%;background:linear-gradient(90deg,#00b300,#00e676);transition:width .3s;}
-.log-wrap{background:var(--sf3);border-radius:var(--rs);border:1px solid var(--b);font-family:var(--mo);font-size:11px;max-height:180px;overflow-y:auto;padding:7px 9px;}
-.lr{padding:2px 0;display:flex;gap:7px;border-bottom:1px solid rgba(255,255,255,.025);}
-.lr:last-child{border-bottom:none;}
-.lt2{color:var(--tx3);flex-shrink:0;}.lm{flex:1;word-break:break-all;}
-.ok{color:var(--gr)}.er{color:var(--rd)}.nf{color:var(--bl)}.wn{color:var(--am)}
-.hist-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--b);font-size:11.5px;}
-.hist-row:last-child{border-bottom:none;}
-.ht2{color:var(--tx2);font-family:var(--mo);font-size:10.5px;min-width:80px;}
-.ha{flex:1;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hok{color:var(--gr);}.hfl{color:var(--rd);}
-.phone{background:#1a1a1a;border-radius:18px;overflow:hidden;border:1.5px solid var(--b2);max-width:310px;margin:0 auto;}
-.quota-card{background:var(--sf2);border-radius:var(--rs);padding:12px;margin-top:5px;}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:var(--fn); background:var(--bg); color:var(--tx); min-height:100vh; display:flex; flex-direction:column; }
+.main-content{ flex:1; padding-bottom:1.1rem; }
+
+/* ========== LOADING SCREEN ========== */
+#ls{ position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; transition:opacity .4s; }
+#ls.hide{ opacity:0; pointer-events:none; }
+.ll{ width:56px; height:56px; background:linear-gradient(135deg,#00c300,#00e676); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 0 30px rgba(0,230,118,.35); animation:pop .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes pop{ from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+.lsub{ font-size:12px; color:var(--tx2); }
+.lbw{ width:180px; height:3px; background:var(--sf3); border-radius:2px; overflow:hidden; }
+.lb{ height:100%; width:0%; background:linear-gradient(90deg,#00b300,#00e676); transition:width .4s; }
+
+/* ========== HEADER ========== */
+.hdr{ position:sticky; top:0; z-index:200; background:rgba(13,13,15,.92); backdrop-filter:blur(24px); border-bottom:1px solid var(--b); padding:.85rem 1.1rem; display:flex; align-items:center; gap:10px; }
+.logo{ width:34px; height:34px; background:linear-gradient(135deg,#00c300,#00e676); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#001800; box-shadow:0 0 16px rgba(0,230,118,.28); }
+.ht h1{ font-size:15px; font-weight:600; letter-spacing:-.3px; }
+.ht p{ font-size:10px; color:var(--tx2); margin-top:1px; }
+.hr{ margin-left:auto; display:flex; align-items:center; gap:7px; }
+.pill{ display:flex; align-items:center; gap:5px; border-radius:20px; padding:4px 9px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid transparent; transition:opacity .2s; }
+.pill:active{ opacity:.7; }
+.pg{ background:var(--gd); border-color:rgba(0,230,118,.22); color:var(--gr); }
+.pa{ background:var(--ad); border-color:rgba(255,171,64,.22); color:var(--am); }
+.pr{ background:var(--rdd); border-color:rgba(255,82,82,.22); color:var(--rd); }
+.dot{ width:6px; height:6px; border-radius:50%; background:currentColor; animation:pulse 2s infinite; }
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* ========== CARDS & FORMS ========== */
+.wrap{ padding:1.1rem; display:flex; flex-direction:column; gap:.9rem; }
+.card{ background:var(--sf); border:1px solid var(--b); border-radius:var(--r); overflow:hidden; }
+.ch{ padding:.75rem 1rem; display:flex; align-items:center; gap:9px; border-bottom:1px solid var(--b); background:var(--sf2); }
+.ci{ width:26px; height:26px; border-radius:var(--rx); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.cib{ background:var(--bd); color:var(--bl); }
+.cig{ background:var(--gd); color:var(--gr); }
+.cia{ background:var(--ad); color:var(--am); }
+.cip{ background:var(--pd); color:var(--pu); }
+.ch h2{ font-size:12.5px; font-weight:600; }
+.badge{ margin-left:auto; font-size:10px; padding:2px 7px; border-radius:10px; background:var(--sf3); color:var(--tx2); white-space:nowrap; }
+.cb{ padding:.9rem 1rem; }
+.field{ margin-bottom:.8rem; }
+label{ display:block; font-size:11px; font-weight:500; color:var(--tx2); margin-bottom:5px; letter-spacing:.3px; text-transform:uppercase; }
+input, textarea{ width:100%; background:var(--sf3); border:1px solid var(--b2); border-radius:var(--rs); color:var(--tx); font-family:var(--mo); font-size:12.5px; padding:9px 11px; outline:none; }
+textarea{ min-height:200px; resize:vertical; line-height:1.65; font-size:11.5px; }
+input:focus, textarea:focus{ border-color:var(--bl); box-shadow:0 0 0 3px rgba(77,166,255,.14); }
+.srow{ display:flex; align-items:center; gap:10px; margin-top:6px; }
+input[type=range]{ flex:1; height:3px; background:var(--sf3); border-radius:2px; }
+input[type=range]::-webkit-slider-thumb{ width:16px; height:16px; border-radius:50%; background:var(--bl); cursor:pointer; }
+.sv{ font-family:var(--mo); font-size:12px; font-weight:500; color:var(--bl); min-width:50px; text-align:right; }
+.stats{ display:flex; gap:7px; margin-bottom:.9rem; }
+.stat{ flex:1; background:var(--sf2); border:1px solid var(--b); border-radius:var(--rs); padding:9px 10px; text-align:center; }
+.stv{ font-size:17px; font-weight:600; font-family:var(--mo); }
+.stl{ font-size:10px; color:var(--tx2); margin-top:2px; text-transform:uppercase; }
+.jtb{ display:flex; gap:5px; flex-wrap:wrap; margin-bottom:7px; }
+.jb{ background:var(--sf3); border:1px solid var(--b); border-radius:var(--rx); color:var(--tx2); font-size:11px; padding:5px 9px; cursor:pointer; }
+.jb:hover{ border-color:var(--b2); color:var(--tx); }
+.jst{ display:flex; align-items:center; gap:5px; font-size:11px; margin-top:5px; color:var(--tx3); }
+.jst.ok{ color:var(--gr); }
+.jst.err{ color:var(--rd); }
+.jsd{ width:5px; height:5px; border-radius:50%; background:currentColor; }
+.tab-row{ display:flex; gap:4px; padding:7px 9px; border-bottom:1px solid var(--b); background:var(--sf2); }
+.tab{ flex:1; background:none; border:1px solid transparent; border-radius:var(--rx); padding:5px 4px; font-size:11px; color:var(--tx2); cursor:pointer; text-align:center; }
+.tab.active{ background:var(--sf3); border-color:var(--b2); color:var(--tx); }
+.tp{ display:none; }
+.tp.active{ display:block; }
+.steps{ display:flex; margin-bottom:1rem; }
+.si{ flex:1; text-align:center; padding:8px 4px; font-size:11px; color:var(--tx3); border-bottom:2px solid var(--b); transition:all .2s; }
+.si.done{ color:var(--gr); border-color:var(--gr); }
+.si.active{ color:var(--bl); border-color:var(--bl); font-weight:600; }
+.sbtn{ width:100%; padding:13px; border:none; border-radius:var(--rs); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px; }
+.sbtn:last-child{ margin-bottom:0; }
+.sbtn:active{ transform:scale(.98); }
+.sbtn:disabled{ opacity:.35; cursor:not-allowed; }
+.bs{ background:linear-gradient(135deg,#1565c0,#4da6ff); color:#fff; }
+.bb{ background:linear-gradient(135deg,#00b300,#00e676); color:#001800; }
+.bst{ background:linear-gradient(135deg,#cc2200,#ff5252); color:#fff; }
+.sp{ width:15px; height:15px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .65s linear infinite; display:none; }
+.sp2{ border-color:rgba(0,0,0,.2); border-top-color:#001800; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.prog-wrap{ background:var(--sf3); border-radius:3px; height:3px; overflow:hidden; margin-bottom:10px; display:none; }
+.prog-bar{ height:100%; width:0%; background:linear-gradient(90deg,#00b300,#00e676); transition:width .3s; }
+.log-wrap{ background:var(--sf3); border-radius:var(--rs); border:1px solid var(--b); font-family:var(--mo); font-size:11px; max-height:180px; overflow-y:auto; padding:7px 9px; }
+.lr{ padding:2px 0; display:flex; gap:7px; border-bottom:1px solid rgba(255,255,255,.025); }
+.lr:last-child{ border-bottom:none; }
+.lt2{ color:var(--tx3); flex-shrink:0; }
+.lm{ flex:1; word-break:break-all; }
+.ok{ color:var(--gr); }
+.er{ color:var(--rd); }
+.nf{ color:var(--bl); }
+.wn{ color:var(--am); }
+.hist-row{ display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--b); font-size:11.5px; }
+.ht2{ color:var(--tx2); font-family:var(--mo); font-size:10.5px; min-width:80px; }
+.ha{ flex:1; color:var(--tx); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hok{ color:var(--gr); }
+.hfl{ color:var(--rd); }
+.phone{ background:#1a1a1a; border-radius:18px; overflow:hidden; border:1.5px solid var(--b2); max-width:310px; margin:0 auto; }
+.footer{ text-align:center; padding:1rem; border-top:1px solid var(--b); margin-top:1rem; font-size:11px; color:var(--tx3); background:var(--sf); }
+.footer a{ color:var(--gr); text-decoration:none; }
 </style>
 </head>
 <body>
 <div id="ls">
-  <div class="ll">💬</div>
-  <div style="font-size:17px;font-weight:600;">LINE Flex Broadcaster</div>
+  <div class="ll"><i class="fas fa-comment-dots"></i></div>
+  <div style="font-size:17px; font-weight:600;">LINE Flex Broadcaster</div>
   <div class="lsub" id="lMsg">กำลังเชื่อมต่อ...</div>
   <div class="lbw"><div class="lb" id="lBar"></div></div>
 </div>
+
+<div class="main-content">
 <div class="hdr">
-  <div class="logo">💬</div>
+  <div class="logo"><i class="fas fa-paper-plane"></i></div>
   <div class="ht"><h1>LINE Flex Broadcaster</h1><p id="hdrSub">กำลังโหลด...</p></div>
   <div class="hr">
     <div class="pill pa" id="uidPill"><div class="dot"></div><span id="uidTxt">— UID</span></div>
     <div class="pill pg" id="stPill" onclick="ping()"><div class="dot"></div><span id="stTxt">Online</span></div>
   </div>
 </div>
+
 <div class="wrap">
-  <!-- RECIPIENTS -->
+  <!-- CARD: จำนวนผู้รับ -->
   <div class="card">
-    <div class="ch"><div class="ci cia">👥</div><h2>จำนวนผู้รับ</h2><span class="badge" id="totalBadge">UID: —</span></div>
+    <div class="ch"><div class="ci cia"><i class="fas fa-users"></i></div><h2>จำนวนผู้รับ</h2><span class="badge" id="totalBadge">UID: —</span></div>
     <div class="cb">
       <div class="field">
         <label>จำนวนที่จะส่ง</label>
         <div class="srow"><input type="range" id="cntS" min="1" max="500" value="150" step="1" oninput="syncCnt(this.value)"><span class="sv" id="cntSv">150</span></div>
-        <div style="display:flex;gap:8px;margin-top:9px;"><input type="number" id="cntN" value="150" min="1" max="50000" style="width:90px;" oninput="syncCnt(this.value)"><span style="font-size:12px;color:var(--tx2)">คน</span></div>
+        <div style="display:flex; gap:8px; margin-top:9px;"><input type="number" id="cntN" value="150" min="1" max="50000" style="width:90px;" oninput="syncCnt(this.value)"><span style="font-size:12px; color:var(--tx2)">คน</span></div>
       </div>
       <div class="field">
         <label>Delay ระหว่าง Message</label>
         <div class="srow"><input type="range" id="dlyS" min="100" max="2000" value="200" step="100" oninput="syncDly(this.value)"><span class="sv" id="dlySv">200 ms</span></div>
-        <div style="display:flex;gap:8px;margin-top:9px;"><input type="number" id="dlyN" value="200" min="100" max="10000" style="width:90px;" oninput="syncDly(this.value)"><span style="font-size:12px;color:var(--tx2)">ms</span></div>
+        <div style="display:flex; gap:8px; margin-top:9px;"><input type="number" id="dlyN" value="200" min="100" max="10000" style="width:90px;" oninput="syncDly(this.value)"><span style="font-size:12px; color:var(--tx2)">ms</span></div>
       </div>
       <div class="stats">
         <div class="stat"><div class="stv" style="color:var(--bl)" id="sTarget">150</div><div class="stl">เป้าหมาย</div></div>
@@ -142,9 +165,9 @@ input[type=range]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%
     </div>
   </div>
 
-  <!-- QUOTA CARD -->
+  <!-- CARD: โควต้า LINE API -->
   <div class="card">
-    <div class="ch"><div class="ci cib">📊</div><h2>โควต้า LINE API (เดือนนี้)</h2></div>
+    <div class="ch"><div class="ci cib"><i class="fas fa-chart-line"></i></div><h2>โควต้า LINE API (เดือนนี้)</h2></div>
     <div class="cb" id="quotaPanel">
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>ใช้ไปแล้ว:</span><span id="quotaUsed">—</span></div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>คงเหลือ:</span><span id="quotaRemaining">—</span></div>
@@ -153,17 +176,22 @@ input[type=range]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%
     </div>
   </div>
 
-  <!-- JSON -->
+  <!-- CARD: Flex Message JSON -->
   <div class="card">
-    <div class="ch"><div class="ci cig">📋</div><h2>Flex Message JSON</h2><span class="badge" id="jBytes">0 B</span></div>
+    <div class="ch"><div class="ci cig"><i class="fas fa-code"></i></div><h2>Flex Message JSON</h2><span class="badge" id="jBytes">0 B</span></div>
     <div class="tab-row">
-      <button class="tab active" onclick="swTab('raw',this)">📝 วาง JSON</button>
-      <button class="tab" onclick="swTab('prev',this)">📱 Preview</button>
+      <button class="tab active" onclick="swTab('raw',this)"><i class="fas fa-pen-alt"></i> วาง JSON</button>
+      <button class="tab" onclick="swTab('prev',this)"><i class="fas fa-mobile-alt"></i> Preview</button>
     </div>
     <div class="cb">
       <div id="tab-raw" class="tp active">
         <div class="field"><label>Alt Text</label><input type="text" id="altTxt" placeholder="ข้อความแจ้งเตือนใน LINE" maxlength="400" oninput="syncAlt()"></div>
-        <div class="jtb"><button class="jb" onclick="fmtJ()">✨ Format</button><button class="jb" onclick="clearJ()">🗑 ล้าง</button><button class="jb" onclick="loadSample()">📎 ตัวอย่าง</button><button class="jb" onclick="copyJ()">📋 คัดลอก</button></div>
+        <div class="jtb">
+          <button class="jb" onclick="fmtJ()"><i class="fas fa-magic"></i> Format</button>
+          <button class="jb" onclick="clearJ()"><i class="fas fa-trash-alt"></i> ล้าง</button>
+          <button class="jb" onclick="loadSample()"><i class="fas fa-file-alt"></i> ตัวอย่าง</button>
+          <button class="jb" onclick="copyJ()"><i class="fas fa-copy"></i> คัดลอก</button>
+        </div>
         <textarea id="jInp" placeholder="วาง Flex Message JSON ที่นี่..." oninput="onJInput()"></textarea>
         <div class="jst" id="jSt"><div class="jsd"></div><span id="jStTx">รอ JSON...</span></div>
       </div>
@@ -171,38 +199,76 @@ input[type=range]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%
     </div>
   </div>
 
-  <!-- SEND -->
+  <!-- CARD: Broadcast และประวัติ -->
   <div class="card">
-    <div class="ch"><div class="ci cig">🚀</div><h2>ส่ง Broadcast</h2></div>
+    <div class="ch"><div class="ci cig"><i class="fas fa-paper-plane"></i></div><h2>ส่ง Broadcast</h2></div>
     <div class="cb">
       <div class="steps"><div class="si active" id="si1">① บันทึก Flex</div><div class="si" id="si2">② ส่งหาผู้ใช้</div><div class="si" id="si3">③ เสร็จสิ้น</div></div>
-      <button class="sbtn bs" id="saveBtn" onclick="onSaveFlex()"><span class="btx">💾 Step 1: บันทึก Flex ไปยัง GS</span><div class="sp"></div></button>
-      <button class="sbtn bb" id="sendBtn" onclick="onSend()" disabled><span class="btx">📤 Step 2: ส่งให้ <span id="cntLbl">150</span> คน</span><div class="sp sp2"></div></button>
+      <button class="sbtn bs" id="saveBtn" onclick="onSaveFlex()"><span class="btx"><i class="fas fa-save"></i> Step 1: บันทึก Flex ไปยัง GS</span><div class="sp"></div></button>
+      <button class="sbtn bb" id="sendBtn" onclick="onSend()" disabled><span class="btx"><i class="fas fa-share"></i> Step 2: ส่งให้ <span id="cntLbl">150</span> คน</span><div class="sp sp2"></div></button>
       <div class="prog-wrap" id="progWrap"><div class="prog-bar" id="progBar"></div></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span>📋 Log</span><span style="font-size:11px;color:var(--rd);cursor:pointer;" onclick="clearLog()">ล้าง</span></div>
+
+      <!-- ปุ่มล้างประวัติ -->
+      <div style="display: flex; gap: 10px; margin: 10px 0;">
+        <button class="jb" onclick="clearBroadcastLog()" style="flex:1;"><i class="fas fa-trash-alt"></i> ล้าง BroadcastLog</button>
+        <button class="jb" onclick="clearSentLogPrompt()" style="flex:1;"><i class="fas fa-database"></i> ล้าง SentLog</button>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-bottom:7px;"><span><i class="fas fa-history"></i> Log</span><span style="font-size:11px; color:var(--rd); cursor:pointer;" onclick="clearLog()"><i class="fas fa-eraser"></i> ล้างหน้าจอ</span></div>
       <div class="log-wrap" id="logArea"><div class="lr"><span class="lt2">--:--</span><span class="lm nf">กำลังโหลด...</span></div></div>
     </div>
   </div>
 
-  <!-- HISTORY -->
+  <!-- CARD: ประวัติการส่งล่าสุด -->
   <div class="card">
-    <div class="ch"><div class="ci cip">📊</div><h2>ประวัติการส่ง</h2><span class="badge" style="cursor:pointer;" onclick="loadHist()">🔄</span></div>
+    <div class="ch"><div class="ci cip"><i class="fas fa-chart-simple"></i></div><h2>ประวัติการส่งล่าสุด</h2><span class="badge" style="cursor:pointer;" onclick="loadHist()"><i class="fas fa-rotate-right"></i></span></div>
     <div class="cb" id="histBody"><p style="font-size:12px;color:var(--tx3);text-align:center;padding:.5rem 0;">กำลังโหลด...</p></div>
   </div>
 </div>
+</div>
+
+<div class="footer">
+  พัฒนาโดย <a href="#" target="_blank">ครบเครื่องเรื่องไอที</a> | <i class="fas fa-comment-dots"></i> LINE Flex Broadcaster
+</div>
 
 <script>
-// ======================== ตั้งค่า URL Web App ของคุณ ========================
+// ============================================================
+// 1. ตัวแปรส่วนกลาง และ URL ของ Web App
+// ============================================================
 const EXEC_URL = 'https://script.google.com/macros/s/AKfycbxaYjYJRZhtCgZDH53fDgoh-mP7B-E1y17g_xKtJc3zFXXf58iuyw3f7ZbnITGGzZ_vXw/exec';
-// ===========================================================================
 
 let isSending = false, abortSend = false, flexSaved = false;
 let sentOk = 0, sentFail = 0;
 let currentQuota = { remaining: 0, total: 0 };
 const Toast = Swal.mixin({toast:true,position:'top',showConfirmButton:false,timer:3000,timerProgressBar:true,background:'#1f1f25',color:'#f0f0f2'});
 
+// ============================================================
+// 2. ฟังก์ชัน JSONP (เรียก API แบบ GET)
+// ============================================================
+let _cbIdx = 0;
+function gj(url, ms = 15000) {
+  return new Promise((resolve, reject) => {
+    const cbName = '__gsCb' + (++_cbIdx);
+    const script = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, ms);
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    const sep = url.indexOf('?') >= 0 ? '&' : '?';
+    script.src = url + sep + 'callback=' + cbName;
+    script.onerror = () => { cleanup(); reject(new Error('Script load error')); };
+    document.head.appendChild(script);
+  });
+}
+
+// ============================================================
+// 3. โหลดข้อมูลเริ่มต้น (config, quota, history)
+// ============================================================
 window.addEventListener('DOMContentLoaded', async () => {
-  setLoad('กำลังโหลด...',30);
+  setLoad('กำลังโหลด...', 30);
   try {
     const d = await gj(EXEC_URL + '?action=getConfig');
     if (d.ok && d.config) {
@@ -218,7 +284,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       addLog('✓ เชื่อมต่อสำเร็จ — ' + (c.botName||'') + ' | UID: ' + (c.totalUIDs||'—') + ' | Token: ' + (c.hasToken?'✓':'✗'), 'ok');
       if (!c.hasToken) addLog('⚠ ยังไม่มี Token — รัน setLineToken() ใน Apps Script ก่อน', 'wn');
 
-      // แสดง quota
+      // แสดงโควต้า
       if (c.quota) {
         currentQuota = c.quota;
         document.getElementById('quotaUsed').innerText = c.quota.used.toLocaleString();
@@ -238,186 +304,493 @@ window.addEventListener('DOMContentLoaded', async () => {
     } else {
       addLog('⚠ ดึง config ไม่สำเร็จ', 'wn');
     }
-    setLoad('โหลดประวัติ...',80);
+    setLoad('โหลดประวัติ...', 80);
     await loadHist();
-    setLoad('พร้อมใช้งาน',100);
-    setTimeout(hideLoad,400);
+    setLoad('พร้อมใช้งาน', 100);
+    setTimeout(hideLoad, 400);
   } catch(err) {
     addLog('❌ เชื่อมต่อไม่ได้: '+err.message,'er');
     document.getElementById('hdrSub').textContent = 'เชื่อมต่อไม่ได้';
-    setLoad('ตรวจสอบ URL',100);
-    setTimeout(hideLoad,800);
+    setLoad('ตรวจสอบ URL', 100);
+    setTimeout(hideLoad, 800);
   }
   updateCntLbl();
 });
 
-function setLoad(msg,pct){ document.getElementById('lMsg').textContent=msg; document.getElementById('lBar').style.width=pct+'%'; }
-function hideLoad(){ const s=document.getElementById('ls'); s.classList.add('hide'); setTimeout(()=>s.style.display='none',450); }
-async function ping(){ try{ const d=await gj(EXEC_URL+'?action=ping'); document.getElementById('stTxt').textContent=d.ok?'Online':'Error'; document.getElementById('stPill').className='pill '+(d.ok?'pg':'pr'); } catch(_){ document.getElementById('stTxt').textContent='Offline'; document.getElementById('stPill').className='pill pr'; } }
-async function loadHist(){
-  const b=document.getElementById('histBody');
-  try{
-    const d=await gj(EXEC_URL+'?action=getLogs&limit=15');
-    if(d.ok && d.logs && d.logs.length) b.innerHTML=d.logs.map(l=>`<div class="hist-row"><span class="ht2">${l.timestamp}</span><span class="ha">${esc(l.altText)}</span><span class="hok">✓${l.sentOk}</span><span class="hfl">✗${l.sentFail}</span></div>`).join('');
-    else b.innerHTML='<p style="font-size:12px;color:var(--tx3);text-align:center;">ยังไม่มีประวัติ</p>';
-  } catch(_){ b.innerHTML='<p style="font-size:12px;color:var(--tx3);text-align:center;">โหลดไม่ได้</p>'; }
+function setLoad(msg, pct) {
+  document.getElementById('lMsg').textContent = msg;
+  document.getElementById('lBar').style.width = pct + '%';
 }
-function syncCnt(v){ v=parseInt(v)||1; const max=parseInt(document.getElementById('cntS').max)||500; if(v>max) v=max; document.getElementById('cntS').value=v; document.getElementById('cntN').value=v; document.getElementById('cntSv').textContent=v; document.getElementById('sTarget').textContent=v.toLocaleString(); updateCntLbl(); updateEst(); }
-function syncDly(v){ v=parseInt(v)||200; document.getElementById('dlyS').value=Math.min(v,2000); document.getElementById('dlyN').value=v; document.getElementById('dlySv').textContent=v+' ms'; updateEst(); }
-function updateEst(){ const n=parseInt(document.getElementById('cntN').value)||0, d=parseInt(document.getElementById('dlyN').value)||200, s=Math.round(n*d/1000); document.getElementById('sEst').textContent=s<60?'~'+s+'s':'~'+Math.round(s/60)+'m'; }
-function updateCntLbl(){ document.getElementById('cntLbl').textContent=(parseInt(document.getElementById('cntN').value)||0).toLocaleString(); }
-document.getElementById('cntS').addEventListener('input',e=>syncCnt(e.target.value));
-document.getElementById('dlyS').addEventListener('input',e=>syncDly(e.target.value));
+function hideLoad() {
+  const s = document.getElementById('ls');
+  s.classList.add('hide');
+  setTimeout(() => s.style.display = 'none', 450);
+}
 
-function validateJ(){
-  const raw=document.getElementById('jInp').value.trim(), st=document.getElementById('jSt'), stx=document.getElementById('jStTx'), bj=document.getElementById('jBytes');
-  if(!raw){ st.className='jst'; stx.textContent='รอ JSON...'; bj.textContent='0 B'; return false; }
-  try{ const p=JSON.parse(raw); const b=new Blob([raw]).size; bj.textContent=b>1024?(b/1024).toFixed(1)+' KB':b+' B'; const t=p.type||'?'; const info=t==='flex'?('contents:'+(p.contents?'✓':'✗')):('type:'+t+' → จะ wrap อัตโนมัติ'); st.className='jst ok'; stx.textContent='✓ '+info; return true; }
-  catch(e){ st.className='jst err'; stx.textContent='✗ '+e.message; bj.textContent='—'; return false; }
+async function ping() {
+  try {
+    const d = await gj(EXEC_URL + '?action=ping');
+    document.getElementById('stTxt').textContent = d.ok ? 'Online' : 'Error';
+    document.getElementById('stPill').className = 'pill ' + (d.ok ? 'pg' : 'pr');
+  } catch(_) {
+    document.getElementById('stTxt').textContent = 'Offline';
+    document.getElementById('stPill').className = 'pill pr';
+  }
 }
-function syncAlt(){ const v=document.getElementById('altTxt').value, ta=document.getElementById('jInp'); if(!ta.value.trim()) return; try{ const o=JSON.parse(ta.value); o.altText=v; ta.value=JSON.stringify(o,null,2); validateJ(); } catch(_){} }
-function onJInput(){ if(flexSaved){ flexSaved=false; document.getElementById('sendBtn').disabled=true; setStep(1); } validateJ(); try{ const o=JSON.parse(document.getElementById('jInp').value); if(o.altText!==undefined) document.getElementById('altTxt').value=o.altText; } catch(_){} }
-function fmtJ(){ const ta=document.getElementById('jInp'); try{ ta.value=JSON.stringify(JSON.parse(ta.value),null,2); onJInput(); Toast.fire({icon:'success',title:'Format เรียบร้อย'}); } catch(e){ Toast.fire({icon:'error',title:'JSON ผิด',text:e.message}); } }
-function clearJ(){ document.getElementById('jInp').value=''; document.getElementById('altTxt').value=''; validateJ(); flexSaved=false; document.getElementById('sendBtn').disabled=true; setStep(1); }
-function copyJ(){ const v=document.getElementById('jInp').value; if(!v) return; navigator.clipboard.writeText(v).then(()=>Toast.fire({icon:'success',title:'คัดลอกแล้ว'})); }
-function loadSample(){ const s={type:'flex',altText:'ทดสอบ LINE Broadcaster',contents:{type:'bubble',body:{type:'box',layout:'vertical',contents:[{type:'text',text:'📣 ทดสอบระบบ',weight:'bold',size:'lg'},{type:'text',text:'ส่งผ่าน LINE Flex Broadcaster',size:'sm',color:'#888888'}]},footer:{type:'box',layout:'horizontal',contents:[{type:'button',style:'primary',action:{type:'message',label:'ตอบรับ',text:'ตอบรับแล้ว'}}]}}}; document.getElementById('jInp').value=JSON.stringify(s,null,2); onJInput(); Toast.fire({icon:'info',title:'โหลดตัวอย่างแล้ว'}); }
-function swTab(name,btn){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active')); btn.classList.add('active'); document.getElementById('tab-'+name).classList.add('active'); if(name==='prev') renderPrev(); }
-function renderPrev(){
-  const area=document.getElementById('prevArea'); let parsed;
-  try{ parsed=JSON.parse(document.getElementById('jInp').value); } catch(e){ area.innerHTML='<div style="padding:1rem;font-size:12px;color:var(--rd);">✗ '+e.message+'</div>'; return; }
-  area.innerHTML='';
-  const ae=document.createElement('div'); ae.style.cssText='font-size:11px;color:var(--tx2);margin-bottom:10px;'; ae.innerHTML='<span style="background:var(--sf3);border:1px solid var(--b2);border-radius:6px;padding:3px 8px;font-family:var(--mo);">altText: '+esc(parsed.altText||'(ไม่มี)')+'</span>'; area.appendChild(ae);
-  const ph=document.createElement('div'); ph.className='phone'; ph.innerHTML='<div style="background:#111;padding:7px 14px 5px;display:flex;justify-content:space-between;"><span style="font-size:10px;color:#888;">LINE</span><span>🔋</span></div><div style="background:#111820;padding:7px 10px;display:flex;align-items:center;gap:8px;"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00c300,#00e676);display:flex;align-items:center;justify-content:center;font-size:12px;">🤖</div><span style="font-size:12px;font-weight:600;color:#eee;">Bot</span></div><div style="background:#0a1620;padding:10px;min-height:80px;" id="bR"></div>';
+
+async function loadHist() {
+  const b = document.getElementById('histBody');
+  try {
+    const d = await gj(EXEC_URL + '?action=getLogs&limit=15');
+    if (d.ok && d.logs && d.logs.length) {
+      b.innerHTML = d.logs.map(l => `
+        <div class="hist-row">
+          <span class="ht2">${l.timestamp}</span>
+          <span class="ha">${esc(l.altText)}</span>
+          <span class="hok"><i class="fas fa-check-circle"></i> ${l.sentOk}</span>
+          <span class="hfl"><i class="fas fa-times-circle"></i> ${l.sentFail}</span>
+        </div>
+      `).join('');
+    } else {
+      b.innerHTML = '<p style="font-size:12px;color:var(--tx3);text-align:center;">ยังไม่มีประวัติ</p>';
+    }
+  } catch(_) {
+    b.innerHTML = '<p style="font-size:12px;color:var(--tx3);text-align:center;">โหลดไม่ได้</p>';
+  }
+}
+
+// ============================================================
+// 4. ฟังก์ชันจัดการ Slider และจำนวน
+// ============================================================
+function syncCnt(v) {
+  v = parseInt(v) || 1;
+  const max = parseInt(document.getElementById('cntS').max) || 500;
+  if (v > max) v = max;
+  document.getElementById('cntS').value = v;
+  document.getElementById('cntN').value = v;
+  document.getElementById('cntSv').textContent = v;
+  document.getElementById('sTarget').textContent = v.toLocaleString();
+  updateCntLbl();
+  updateEst();
+}
+function syncDly(v) {
+  v = parseInt(v) || 200;
+  document.getElementById('dlyS').value = Math.min(v, 2000);
+  document.getElementById('dlyN').value = v;
+  document.getElementById('dlySv').textContent = v + ' ms';
+  updateEst();
+}
+function updateEst() {
+  const n = parseInt(document.getElementById('cntN').value) || 0;
+  const d = parseInt(document.getElementById('dlyN').value) || 200;
+  const s = Math.round(n * d / 1000);
+  document.getElementById('sEst').textContent = s < 60 ? '~' + s + 's' : '~' + Math.round(s/60) + 'm';
+}
+function updateCntLbl() {
+  document.getElementById('cntLbl').textContent = (parseInt(document.getElementById('cntN').value) || 0).toLocaleString();
+}
+document.getElementById('cntS').addEventListener('input', e => syncCnt(e.target.value));
+document.getElementById('dlyS').addEventListener('input', e => syncDly(e.target.value));
+
+// ============================================================
+// 5. จัดการ Flex Message JSON
+// ============================================================
+function validateJ() {
+  const raw = document.getElementById('jInp').value.trim();
+  const st = document.getElementById('jSt');
+  const stx = document.getElementById('jStTx');
+  const bj = document.getElementById('jBytes');
+  if (!raw) {
+    st.className = 'jst'; stx.textContent = 'รอ JSON...'; bj.textContent = '0 B';
+    return false;
+  }
+  try {
+    const p = JSON.parse(raw);
+    const b = new Blob([raw]).size;
+    bj.textContent = b > 1024 ? (b/1024).toFixed(1) + ' KB' : b + ' B';
+    const t = p.type || '?';
+    const info = t === 'flex' ? ('contents:' + (p.contents ? '✓' : '✗')) : ('type:'+t+' → จะ wrap อัตโนมัติ');
+    st.className = 'jst ok';
+    stx.textContent = '✓ ' + info;
+    return true;
+  } catch(e) {
+    st.className = 'jst err';
+    stx.textContent = '✗ ' + e.message;
+    bj.textContent = '—';
+    return false;
+  }
+}
+function syncAlt() {
+  const v = document.getElementById('altTxt').value;
+  const ta = document.getElementById('jInp');
+  if (!ta.value.trim()) return;
+  try {
+    const o = JSON.parse(ta.value);
+    o.altText = v;
+    ta.value = JSON.stringify(o, null, 2);
+    validateJ();
+  } catch(_) {}
+}
+function onJInput() {
+  if (flexSaved) {
+    flexSaved = false;
+    document.getElementById('sendBtn').disabled = true;
+    setStep(1);
+  }
+  validateJ();
+  try {
+    const o = JSON.parse(document.getElementById('jInp').value);
+    if (o.altText !== undefined) document.getElementById('altTxt').value = o.altText;
+  } catch(_) {}
+}
+function fmtJ() {
+  const ta = document.getElementById('jInp');
+  try {
+    ta.value = JSON.stringify(JSON.parse(ta.value), null, 2);
+    onJInput();
+    Toast.fire({icon:'success', title:'Format เรียบร้อย'});
+  } catch(e) {
+    Toast.fire({icon:'error', title:'JSON ผิด', text:e.message});
+  }
+}
+function clearJ() {
+  document.getElementById('jInp').value = '';
+  document.getElementById('altTxt').value = '';
+  validateJ();
+  flexSaved = false;
+  document.getElementById('sendBtn').disabled = true;
+  setStep(1);
+}
+function copyJ() {
+  const v = document.getElementById('jInp').value;
+  if (!v) return;
+  navigator.clipboard.writeText(v).then(() => Toast.fire({icon:'success', title:'คัดลอกแล้ว'}));
+}
+function loadSample() {
+  const sample = {
+    type: 'flex',
+    altText: 'ทดสอบ LINE Broadcaster',
+    contents: {
+      type: 'bubble',
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        contents: [
+          { type: 'text', text: '📣 ทดสอบระบบ', weight: 'bold', size: 'lg' },
+          { type: 'text', text: 'ส่งผ่าน LINE Flex Broadcaster', size: 'sm', color: '#888888' }
+        ]
+      },
+      footer: {
+        type: 'box',
+        layout: 'horizontal',
+        contents: [{ type: 'button', style: 'primary', action: { type: 'message', label: 'ตอบรับ', text: 'ตอบรับแล้ว' } }]
+      }
+    }
+  };
+  document.getElementById('jInp').value = JSON.stringify(sample, null, 2);
+  onJInput();
+  Toast.fire({icon:'info', title:'โหลดตัวอย่างแล้ว'});
+}
+
+// ============================================================
+// 6. Tab Preview (แสดงผล Flex)
+// ============================================================
+function swTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tp').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name === 'prev') renderPrev();
+}
+function renderPrev() {
+  const area = document.getElementById('prevArea');
+  let parsed;
+  try {
+    parsed = JSON.parse(document.getElementById('jInp').value);
+  } catch(e) {
+    area.innerHTML = '<div style="padding:1rem;font-size:12px;color:var(--rd);">✗ '+e.message+'</div>';
+    return;
+  }
+  area.innerHTML = '';
+  const ae = document.createElement('div');
+  ae.style.cssText = 'font-size:11px;color:var(--tx2);margin-bottom:10px;';
+  ae.innerHTML = '<span style="background:var(--sf3);border:1px solid var(--b2);border-radius:6px;padding:3px 8px;font-family:var(--mo);"><i class="fas fa-comment"></i> altText: '+esc(parsed.altText||'(ไม่มี)')+'</span>';
+  area.appendChild(ae);
+  const ph = document.createElement('div');
+  ph.className = 'phone';
+  ph.innerHTML = '<div style="background:#111;padding:7px 14px 5px;display:flex;justify-content:space-between;"><span style="font-size:10px;color:#888;"><i class="fab fa-line"></i> LINE</span><span><i class="fas fa-battery-full"></i></span></div><div style="background:#111820;padding:7px 10px;display:flex;align-items:center;gap:8px;"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00c300,#00e676);display:flex;align-items:center;justify-content:center;font-size:12px;color:#001800;"><i class="fas fa-robot"></i></div><span style="font-size:12px;font-weight:600;color:#eee;">Bot</span></div><div style="background:#0a1620;padding:10px;min-height:80px;" id="bR"></div>';
   area.appendChild(ph);
-  try{ ph.querySelector('#bR').appendChild(buildB(parsed.contents||parsed)); } catch(e){ ph.querySelector('#bR').innerHTML='<div style="padding:6px;color:var(--rd);">'+e.message+'</div>'; }
-  const lk=document.createElement('div'); lk.style.cssText='margin-top:10px;text-align:center;'; lk.innerHTML='<a href="https://developers.line.biz/flex-simulator/" target="_blank" style="font-size:11px;color:var(--bl);background:var(--bd);border-radius:6px;padding:5px 12px;display:inline-block;">🔗 Flex Simulator</a>'; area.appendChild(lk);
+  try {
+    ph.querySelector('#bR').appendChild(buildB(parsed.contents || parsed));
+  } catch(e) {
+    ph.querySelector('#bR').innerHTML = '<div style="padding:6px;color:var(--rd);">'+e.message+'</div>';
+  }
+  const lk = document.createElement('div');
+  lk.style.cssText = 'margin-top:10px;text-align:center;';
+  lk.innerHTML = '<a href="https://developers.line.biz/flex-simulator/" target="_blank" style="font-size:11px;color:var(--bl);background:var(--bd);border-radius:6px;padding:5px 12px;display:inline-block;"><i class="fas fa-external-link-alt"></i> Flex Simulator</a>';
+  area.appendChild(lk);
 }
-function buildB(c){
-  const w=document.createElement('div'); w.style.cssText='border-radius:12px;overflow:hidden;background:#fff;max-width:290px;font-family:sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.4);';
-  if(!c)return w;
-  if(c.type==='carousel'){w.style.cssText='display:flex;gap:8px;overflow-x:auto;padding:2px;';(c.contents||[]).forEach(b=>{const m=buildB(b);m.style.flexShrink='0';m.style.width='240px';w.appendChild(m);});return w;}
-  if(c.hero)w.appendChild(rH(c.hero));
-  if(c.header)w.appendChild(rB(c.header,c.styles?.header?.backgroundColor||'#fff'));
-  if(c.body)w.appendChild(rB(c.body,c.styles?.body?.backgroundColor||'#fff'));
-  if(c.footer)w.appendChild(rB(c.footer,c.styles?.footer?.backgroundColor||'#f5f5f5'));
+
+// ฟังก์ชัน buildBubble (ย่อมาจากของเดิม ทำงานเหมือนเดิม)
+function buildB(c) {
+  const w = document.createElement('div');
+  w.style.cssText = 'border-radius:12px;overflow:hidden;background:#fff;max-width:290px;font-family:sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.4);';
+  if (!c) return w;
+  if (c.type === 'carousel') {
+    w.style.cssText = 'display:flex;gap:8px;overflow-x:auto;padding:2px;';
+    (c.contents || []).forEach(b => { const m = buildB(b); m.style.flexShrink = '0'; m.style.width = '240px'; w.appendChild(m); });
+    return w;
+  }
+  if (c.hero) w.appendChild(rHero(c.hero));
+  if (c.header) w.appendChild(rBox(c.header, c.styles?.header?.backgroundColor || '#fff'));
+  if (c.body) w.appendChild(rBox(c.body, c.styles?.body?.backgroundColor || '#fff'));
+  if (c.footer) w.appendChild(rBox(c.footer, c.styles?.footer?.backgroundColor || '#f5f5f5'));
   return w;
 }
-function rH(h){const d=document.createElement('div');if(h.type==='image'){const img=document.createElement('img');img.src=h.url||'';const[pw,ph]=(h.aspectRatio||'20:13').split(':').map(Number);img.style.cssText='width:100%;display:block;object-fit:'+(h.aspectMode||'cover')+';aspect-ratio:'+pw+'/'+ph+';';img.onerror=()=>{d.style.cssText='background:#e0e0e0;height:130px;';img.remove();};d.appendChild(img);}return d;}
-function rB(box,bg){const d=document.createElement('div');const lay=box.layout||'vertical';d.style.cssText='background:'+(bg||'#fff')+';padding:10px;display:flex;flex-direction:'+(lay==='horizontal'||lay==='baseline'?'row':'column')+';gap:'+gp(box.spacing)+';';(box.contents||[]).forEach(c=>{const el=rC(c);if(el)d.appendChild(el);});return d;}
-function rC(c){if(!c)return null;switch(c.type){case'text':{const el=document.createElement('div');el.style.cssText='font-size:'+sz(c.size)+';color:'+(c.color||'#111')+';font-weight:'+(c.weight==='bold'?'700':'400')+';'+(c.wrap?'white-space:pre-wrap;word-break:break-word;':'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;')+(c.align?'text-align:'+c.align+';':'')+(c.flex?'flex:'+c.flex+';':'')+(c.margin?'margin-top:'+gp(c.margin)+';':'');el.textContent=c.text||'';return el;}case'button':{const b=document.createElement('button');const col=c.color||(c.style==='primary'?'#00b300':'#888');b.style.cssText='width:100%;padding:9px;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:default;background:'+(c.style==='primary'||c.style==='link'?col:'#f0f0f0')+';color:'+(c.style==='primary'?'#fff':(c.style==='link'?col:'#333'))+';'+(c.flex?'flex:'+c.flex+';':'');b.textContent=(c.action?.label)||'';return b;}case'image':return rH(c);case'box':return rB(c,c.backgroundColor||'');case'separator':{const hr=document.createElement('hr');hr.style.cssText='border:none;border-top:1px solid '+(c.color||'#e0e0e0')+';margin:'+(gp(c.margin)||'4px')+' 0;';return hr;}default:return null;}}
-function sz(s){return{xxs:'10px',xs:'11px',sm:'13px',md:'14px',lg:'17px',xl:'20px',xxl:'24px','3xl':'28px','4xl':'32px','5xl':'40px'}[s]||'14px';}
-function gp(s){return{none:'0',xs:'4px',sm:'6px',md:'10px',lg:'16px',xl:'24px',xxl:'32px'}[s]||'8px';}
+function rHero(h) {
+  const d = document.createElement('div');
+  if (h.type === 'image') {
+    const img = document.createElement('img');
+    img.src = h.url || '';
+    const [pw, ph] = (h.aspectRatio || '20:13').split(':').map(Number);
+    img.style.cssText = `width:100%;display:block;object-fit:${h.aspectMode || 'cover'};aspect-ratio:${pw}/${ph};`;
+    img.onerror = () => { d.style.cssText = 'background:#e0e0e0;height:130px;'; img.remove(); };
+    d.appendChild(img);
+  }
+  return d;
+}
+function rBox(box, bg) {
+  const d = document.createElement('div');
+  const lay = box.layout || 'vertical';
+  d.style.cssText = `background:${bg || '#fff'};padding:10px;display:flex;flex-direction:${lay === 'horizontal' || lay === 'baseline' ? 'row' : 'column'};gap:${gp(box.spacing)};` + (lay === 'baseline' ? 'align-items:baseline;' : '');
+  (box.contents || []).forEach(c => { const el = rComp(c); if (el) d.appendChild(el); });
+  return d;
+}
+function rComp(c) {
+  if (!c) return null;
+  switch (c.type) {
+    case 'text': {
+      const el = document.createElement('div');
+      el.style.cssText = `font-size:${sz(c.size)};color:${c.color || '#111'};font-weight:${c.weight === 'bold' ? '700' : '400'};${c.wrap ? 'white-space:pre-wrap;word-break:break-word;' : 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'}${c.align ? 'text-align:'+c.align+';' : ''}${c.flex ? 'flex:'+c.flex+';' : ''}${c.margin ? 'margin-top:'+gp(c.margin)+';' : ''}`;
+      el.textContent = c.text || '';
+      return el;
+    }
+    case 'button': {
+      const b = document.createElement('button');
+      const col = c.color || (c.style === 'primary' ? '#00b300' : '#888');
+      b.style.cssText = `width:100%;padding:9px;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:default;background:${c.style === 'primary' || c.style === 'link' ? col : '#f0f0f0'};color:${c.style === 'primary' ? '#fff' : (c.style === 'link' ? col : '#333')};${c.flex ? 'flex:'+c.flex+';' : ''}`;
+      b.textContent = (c.action?.label) || '';
+      return b;
+    }
+    case 'image': return rHero(c);
+    case 'box': return rBox(c, c.backgroundColor || '');
+    case 'separator': {
+      const hr = document.createElement('hr');
+      hr.style.cssText = `border:none;border-top:1px solid ${c.color || '#e0e0e0'};margin:${gp(c.margin) || '4px'} 0;`;
+      return hr;
+    }
+    default: return null;
+  }
+}
+function sz(s) {
+  const map = { xxs:'10px', xs:'11px', sm:'13px', md:'14px', lg:'17px', xl:'20px', xxl:'24px', '3xl':'28px', '4xl':'32px', '5xl':'40px' };
+  return map[s] || '14px';
+}
+function gp(s) {
+  const map = { none:'0', xs:'4px', sm:'6px', md:'10px', lg:'16px', xl:'24px', xxl:'32px' };
+  return map[s] || '8px';
+}
 
-async function onSaveFlex(){
+// ============================================================
+// 7. Step 1: บันทึก Flex Message
+// ============================================================
+async function onSaveFlex() {
   let jsonRaw = document.getElementById('jInp').value.trim();
-  if (!jsonRaw) return Toast.fire({icon:'warning',title:'กรุณาใส่ JSON'});
+  if (!jsonRaw) return Toast.fire({icon:'warning', title:'กรุณาใส่ JSON'});
   let parsed;
-  try{ parsed = JSON.parse(jsonRaw); } catch(e){ return Toast.fire({icon:'error',title:'JSON parse error',text:e.message}); }
-  // auto-wrap ให้เป็น flex message
+  try { parsed = JSON.parse(jsonRaw); }
+  catch(e) { return Toast.fire({icon:'error', title:'JSON parse error', text:e.message}); }
   let flexMsg;
   if (parsed.type === 'flex' && parsed.contents) flexMsg = parsed;
   else {
     let alt = document.getElementById('altTxt').value.trim() || 'Flex Message';
-    flexMsg = { type:'flex', altText: alt, contents: parsed };
+    flexMsg = { type:'flex', altText:alt, contents: parsed };
     document.getElementById('jInp').value = JSON.stringify(flexMsg, null, 2);
     document.getElementById('altTxt').value = alt;
     validateJ();
   }
   const finalJson = JSON.stringify(flexMsg);
   setBtnLoad('saveBtn', true);
-  addLog('กำลังบันทึก Flex...','nf');
-  try{
+  addLog('กำลังบันทึก Flex...', 'nf');
+  try {
     const utf8 = new TextEncoder().encode(finalJson);
     let bin = ''; utf8.forEach(b => bin += String.fromCharCode(b));
     const b64 = btoa(bin);
     const d = await gj(EXEC_URL + '?action=saveFlex&flex=' + encodeURIComponent(b64));
-    if(d.ok){
+    if (d.ok) {
       flexSaved = true;
-      addLog('✓ บันทึกสำเร็จ altText: '+(d.altText||'—'),'ok');
+      addLog('✓ บันทึกสำเร็จ altText: ' + (d.altText||'—'), 'ok');
       document.getElementById('sendBtn').disabled = false;
       setStep(2);
-      Toast.fire({icon:'success',title:'บันทึกสำเร็จ'});
+      Toast.fire({icon:'success', title:'บันทึกสำเร็จ'});
     } else {
-      addLog('✗ '+ (d.message||d.error),'er');
-      Toast.fire({icon:'error',title:'บันทึกไม่สำเร็จ',text:d.message});
+      addLog('✗ ' + (d.message||d.error), 'er');
+      Toast.fire({icon:'error', title:'บันทึกไม่สำเร็จ', text:d.message});
     }
-  } catch(err){ addLog('✗ '+err.message,'er'); Toast.fire({icon:'error',title:'Error',text:err.message}); }
+  } catch(err) {
+    addLog('✗ ' + err.message, 'er');
+    Toast.fire({icon:'error', title:'Error', text:err.message});
+  }
   setBtnLoad('saveBtn', false);
 }
 
-async function onSend(){
-  if(isSending){ abortSend=true; return; }
-  if(!flexSaved) return Toast.fire({icon:'warning',title:'กด Step 1 ก่อน'});
-  const count = parseInt(document.getElementById('cntN').value)||0;
-  if(count<1) return Toast.fire({icon:'warning',title:'ระบุจำนวนผู้รับ'});
-  // ตรวจสอบ quota ก่อน
-  if(currentQuota.remaining && count > currentQuota.remaining){
-    return Toast.fire({icon:'error',title:'โควต้าไม่พอ',text:`ต้องการส่ง ${count} คน แต่เหลือ ${currentQuota.remaining} ข้อความ`});
+// ============================================================
+// 8. Step 2: ส่ง Broadcast (พร้อมตรวจสอบโควต้าก่อน)
+// ============================================================
+async function onSend() {
+  if (isSending) { abortSend = true; return; }
+  if (!flexSaved) return Toast.fire({icon:'warning', title:'กด Step 1 ก่อน'});
+  const count = parseInt(document.getElementById('cntN').value) || 0;
+  if (count < 1) return Toast.fire({icon:'warning', title:'ระบุจำนวนผู้รับ'});
+  if (currentQuota.remaining && count > currentQuota.remaining) {
+    return Toast.fire({icon:'error', title:'โควต้าไม่พอ', text:`ต้องการส่ง ${count} คน แต่เหลือ ${currentQuota.remaining} ข้อความ`});
   }
-  const delay = parseInt(document.getElementById('dlyN').value)||200;
-  const {isConfirmed}=await Swal.fire({title:'🚀 ยืนยันการส่ง',html:`<div>ส่งให้ <b>${count.toLocaleString()}</b> คน<br>Delay ${delay} ms | ประมาณ ${Math.round(count*delay/1000)} วินาที</div>`,icon:'question',showCancelButton:true,confirmButtonText:'ส่งเลย',cancelButtonText:'ยกเลิก',background:'#17171b',color:'#f0f0f2',confirmButtonColor:'#00b300',cancelButtonColor:'#3a3a45'});
-  if(!isConfirmed) return;
-  isSending=true; abortSend=false; sentOk=0; sentFail=0;
-  document.getElementById('sSent').textContent='0'; document.getElementById('sFail').textContent='0';
-  document.getElementById('progWrap').style.display='block'; setStep(2); setSendStop(true); clearLog();
-  addLog('เริ่มส่ง '+count+' คน | delay '+delay+' ms','nf');
-  const BATCH=50; let startIndex=0;
-  while(!abortSend){
+  const delay = parseInt(document.getElementById('dlyN').value) || 200;
+  const { isConfirmed } = await Swal.fire({
+    title: '🚀 ยืนยันการส่ง',
+    html: `<div>ส่งให้ <b>${count.toLocaleString()}</b> คน<br>Delay ${delay} ms | ประมาณ ${Math.round(count*delay/1000)} วินาที</div>`,
+    icon: 'question', showCancelButton: true,
+    confirmButtonText: 'ส่งเลย', cancelButtonText: 'ยกเลิก',
+    background: '#17171b', color: '#f0f0f2',
+    confirmButtonColor: '#00b300', cancelButtonColor: '#3a3a45'
+  });
+  if (!isConfirmed) return;
+  isSending = true; abortSend = false; sentOk = 0; sentFail = 0;
+  document.getElementById('sSent').textContent = '0';
+  document.getElementById('sFail').textContent = '0';
+  document.getElementById('progWrap').style.display = 'block';
+  setStep(2); setSendStop(true); clearLog();
+  addLog('เริ่มส่ง '+count+' คน | delay '+delay+' ms', 'nf');
+  const BATCH = 50;
+  let startIndex = 0;
+  while (!abortSend) {
     const url = EXEC_URL + '?action=broadcast&count='+count+'&batchSize='+BATCH+'&startIndex='+startIndex+'&delay='+delay;
-    try{
+    try {
       const d = await gj(url, 180000);
-      if(!d.ok){ addLog('✗ GS: '+(d.message||d.error),'er'); break; }
-      sentOk += d.sentOk||0; sentFail += d.sentFail||0;
+      if (!d.ok) { addLog('✗ GS: ' + (d.message||d.error), 'er'); break; }
+      sentOk += d.sentOk || 0; sentFail += d.sentFail || 0;
       startIndex = d.nextIndex !== undefined ? d.nextIndex : (startIndex + BATCH);
-      addLog(`✓ batch: +${d.sentOk} OK, +${d.sentFail} FAIL (รวม ${sentOk}/${count})`, d.sentFail>0?'wn':'ok');
-      if(d.errors && d.errors.length) d.errors.forEach(e=>addLog(`  ✗ ${e.uid}: ${e.err}`,'er'));
-      if(d.done || sentOk >= count){ addLog('📋 ส่งครบแล้ว', 'ok'); break; }
-    } catch(err){ addLog('✗ batch error: '+err.message,'er'); startIndex += BATCH; if(sentFail > count*0.5) break; }
-    document.getElementById('sSent').textContent=sentOk; document.getElementById('sFail').textContent=sentFail;
-    document.getElementById('progBar').style.width = Math.min(100, Math.round(sentOk/count*100))+'%';
+      addLog(`✓ batch: +${d.sentOk} OK, +${d.sentFail} FAIL (รวม ${sentOk}/${count})`, d.sentFail > 0 ? 'wn' : 'ok');
+      if (d.errors && d.errors.length) d.errors.forEach(e => addLog(`  ✗ ${e.uid}: ${e.err}`, 'er'));
+      if (d.done || sentOk >= count) { addLog('📋 ส่งครบแล้ว', 'ok'); break; }
+    } catch(err) {
+      addLog('✗ batch error: '+err.message, 'er');
+      startIndex += BATCH;
+      if (sentFail > count * 0.5) break;
+    }
+    document.getElementById('sSent').textContent = sentOk;
+    document.getElementById('sFail').textContent = sentFail;
+    document.getElementById('progBar').style.width = Math.min(100, Math.round(sentOk/count*100)) + '%';
   }
-  addLog(`🎉 เสร็จ: สำเร็จ ${sentOk} / ล้มเหลว ${sentFail}`, sentOk>0?'ok':'er');
-  Toast.fire({icon:sentFail===0?'success':(sentOk===0?'error':'warning'),title:'ส่งเสร็จ '+sentOk+' คน'});
-  setStep(3); await loadHist(); isSending=false; setSendStop(false);
+  addLog(`🎉 เสร็จ: สำเร็จ ${sentOk} / ล้มเหลว ${sentFail}`, sentOk > 0 ? 'ok' : 'er');
+  Toast.fire({icon: sentFail===0 ? 'success' : (sentOk===0 ? 'error' : 'warning'), title:'ส่งเสร็จ '+sentOk+' คน'});
+  setStep(3); await loadHist(); isSending = false; setSendStop(false);
 }
-function setStep(n){ ['si1','si2','si3'].forEach((id,i)=>{ const el=document.getElementById(id); el.className='si'+(i+1<n?' done':i+1===n?' active':''); }); }
-function setBtnLoad(id,on){ const btn=document.getElementById(id); btn.querySelector('.sp').style.display=on?'block':'none'; btn.querySelector('.btx').style.display=on?'none':'block'; btn.disabled=on; }
-function setSendStop(sending){
-  const btn=document.getElementById('sendBtn'), sp=btn.querySelector('.sp'), tx=btn.querySelector('.btx');
-  if(sending){
-    sp.style.display='block'; tx.style.display='none';
-    setTimeout(()=>{ sp.style.display='none'; tx.style.display='block'; tx.textContent='⏹ หยุดส่ง'; btn.className='sbtn bst'; btn.disabled=false; },600);
-  } else {
-    sp.style.display='none'; tx.style.display='block';
-    tx.innerHTML='📤 Step 2: ส่งให้ <span id="cntLbl">'+document.getElementById('cntN').value+'</span> คน';
-    btn.className='sbtn bb'; btn.disabled=!flexSaved;
+
+// ============================================================
+// 9. ฟังก์ชันล้างประวัติ (ใหม่)
+// ============================================================
+async function clearBroadcastLog() {
+  const confirm = await Swal.fire({
+    title: 'ยืนยันการล้าง BroadcastLog',
+    text: 'คุณต้องการล้างประวัติการส่งทั้งหมดใช่หรือไม่? (ไม่สามารถกู้คืนได้)',
+    icon: 'warning', showCancelButton: true, confirmButtonText: 'ล้าง', cancelButtonText: 'ยกเลิก',
+    background: '#17171b', color: '#f0f0f2', confirmButtonColor: '#ff5252'
+  });
+  if (!confirm.isConfirmed) return;
+  addLog('กำลังล้าง BroadcastLog...', 'nf');
+  try {
+    const d = await gj(EXEC_URL + '?action=clearBroadcastLog');
+    if (d.ok) {
+      addLog('✓ ล้าง BroadcastLog สำเร็จ', 'ok');
+      await loadHist();
+      Toast.fire({icon:'success', title:'ล้างประวัติสำเร็จ'});
+    } else {
+      addLog('✗ ล้างไม่สำเร็จ: '+d.message, 'er');
+    }
+  } catch(err) {
+    addLog('✗ error: '+err.message, 'er');
   }
 }
-function addLog(msg,cls){
-  cls=cls||'nf';
-  if(msg.includes('[429]')) msg += ' — ถึงขีดจำกัดรายเดือนแล้ว กรุณารอเดือนถัดไป';
-  const a=document.getElementById('logArea');
-  const now=new Date().toLocaleTimeString('th-TH',{hour12:false,hour:'2-digit',minute:'2-digit'});
-  const d=document.createElement('div'); d.className='lr'; d.innerHTML='<span class="lt2">'+now+'</span><span class="lm '+cls+'">'+msg+'</span>';
-  a.appendChild(d); a.scrollTop=a.scrollHeight;
+
+async function clearSentLogPrompt() {
+  const { value: altKey } = await Swal.fire({
+    title: 'ล้าง SentLog',
+    input: 'text',
+    inputLabel: 'ระบุ AltText ที่ต้องการล้าง (เว้นว่างเพื่อล้างทั้งหมด)',
+    inputPlaceholder: 'เช่น "ข้อความโปรโมชั่น" หรือ เว้นว่าง',
+    showCancelButton: true, confirmButtonText: 'ล้าง', cancelButtonText: 'ยกเลิก',
+    background: '#17171b', color: '#f0f0f2'
+  });
+  if (altKey === undefined) return;
+  addLog('กำลังล้าง SentLog...', 'nf');
+  try {
+    let url = EXEC_URL + '?action=clearSentLog';
+    if (altKey && altKey.trim() !== '') url += '&altKey=' + encodeURIComponent(altKey.trim());
+    const d = await gj(url);
+    if (d.ok) {
+      addLog('✓ ' + d.message, 'ok');
+      Toast.fire({icon:'success', title:'ล้าง SentLog สำเร็จ'});
+    } else {
+      addLog('✗ ' + d.message, 'er');
+    }
+  } catch(err) {
+    addLog('✗ error: '+err.message, 'er');
+  }
 }
-function clearLog(){ document.getElementById('logArea').innerHTML=''; }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-let _cbIdx=0;
-function gj(url, ms){
-  ms=ms||15000;
-  return new Promise((resolve,reject)=>{
-    const cbName='__gsCb'+(++_cbIdx);
-    const script=document.createElement('script');
-    const timer=setTimeout(()=>{ cleanup(); reject(new Error('Timeout')); }, ms);
-    window[cbName]=function(data){ cleanup(); resolve(data); };
-    function cleanup(){ clearTimeout(timer); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
-    const sep=url.indexOf('?')>=0?'&':'?';
-    script.src=url+sep+'callback='+cbName;
-    script.onerror=()=>{ cleanup(); reject(new Error('Script load error')); };
-    document.head.appendChild(script);
+
+// ============================================================
+// 10. ฟังก์ชันเสริม UI
+// ============================================================
+function setStep(n) {
+  ['si1','si2','si3'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.className = 'si' + (i+1 < n ? ' done' : i+1 === n ? ' active' : '');
   });
 }
+function setBtnLoad(id, on) {
+  const btn = document.getElementById(id);
+  btn.querySelector('.sp').style.display = on ? 'block' : 'none';
+  btn.querySelector('.btx').style.display = on ? 'none' : 'block';
+  btn.disabled = on;
+}
+function setSendStop(sending) {
+  const btn = document.getElementById('sendBtn'), sp = btn.querySelector('.sp'), tx = btn.querySelector('.btx');
+  if (sending) {
+    sp.style.display = 'block'; tx.style.display = 'none';
+    setTimeout(() => {
+      sp.style.display = 'none'; tx.style.display = 'block';
+      tx.innerHTML = '<i class="fas fa-stop"></i> หยุดส่ง';
+      btn.className = 'sbtn bst'; btn.disabled = false;
+    }, 600);
+  } else {
+    sp.style.display = 'none'; tx.style.display = 'block';
+    tx.innerHTML = '<i class="fas fa-share"></i> Step 2: ส่งให้ <span id="cntLbl">'+document.getElementById('cntN').value+'</span> คน';
+    btn.className = 'sbtn bb'; btn.disabled = !flexSaved;
+  }
+}
+function addLog(msg, cls) {
+  cls = cls || 'nf';
+  if (msg.includes('[429]')) msg += ' — ถึงขีดจำกัดรายเดือนแล้ว กรุณารอเดือนถัดไป';
+  const a = document.getElementById('logArea');
+  const now = new Date().toLocaleTimeString('th-TH', {hour12:false, hour:'2-digit', minute:'2-digit'});
+  const d = document.createElement('div'); d.className = 'lr';
+  d.innerHTML = '<span class="lt2">'+now+'</span><span class="lm '+cls+'">'+msg+'</span>';
+  a.appendChild(d); a.scrollTop = a.scrollHeight;
+}
+function clearLog() { document.getElementById('logArea').innerHTML = ''; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 updateEst();
 </script>
 </body>
