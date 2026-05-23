@@ -318,7 +318,7 @@ function buildFlexMessage(data, actionType = "create") {
                     color: "#d1fae5",
                     size: "xxs",
                     weight: "bold",
-                  },
+                  },c
                   {
                     type: "text",
                     text: actionText,
