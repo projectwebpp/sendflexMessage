@@ -74,13 +74,19 @@ let useDemoStorage = false;
 let captchaVerified = false;
 let lineProfileLoaded = false;
 
-function buildFlexMessage(data, isUpdate = false) {
+function buildFlexMessage(data, actionType = "create") {
   const isActive = data.status === "active";
   const statusLabel = isActive ? "ใช้งาน" : "ไม่ใช้งาน";
   const statusColor = isActive ? "#34d399" : "#fbbf24";
   const statusBg = isActive ? "#064e3b" : "#451a03";
-  const headerBg = isActive ? "#059669" : "#b45309";
-  const actionText = isUpdate ? "อัปเดตรายชื่อ" : "เพิ่มรายชื่อใหม่";
+
+  let headerBg = isActive ? "#059669" : "#b45309";
+  let actionText = actionType === "update" ? "อัปเดตรายชื่อ" : "เพิ่มรายชื่อใหม่";
+
+  if (actionType === "delete") {
+    headerBg = "#dc2626";
+    actionText = "ลบรายชื่อ";
+  }
 
   const now = new Date().toLocaleString("th-TH", {
     timeZone: "Asia/Bangkok",
@@ -220,9 +226,29 @@ function buildFlexMessage(data, isUpdate = false) {
     margin: "lg",
   });
 
+  const footerContents = [];
+  if (actionType !== "delete") {
+    footerContents.push(
+      {
+        type: "button",
+        action: { type: "uri", label: "📞 โทรออก", uri: `tel:${data.phone}` },
+        style: "primary",
+        height: "sm",
+        color: "#ff0000",
+      },
+      {
+        type: "button",
+        action: { type: "uri", label: "✉ ส่งอีเมล", uri: `mailto:${data.email}` },
+        style: "primary",
+        height: "sm",
+        color: "#059669",
+      },
+    );
+  }
+
   return {
     type: "flex",
-    altText: `${actionText}สำเร็จ ✓ ${data.name}`,
+    altText: `${actionText}สำเร็จ ${actionType === "delete" ? "🗑️" : "✓"} ${data.name}`,
     contents: {
       type: "bubble",
       size: "mega",
@@ -271,9 +297,9 @@ function buildFlexMessage(data, isUpdate = false) {
                 contents: [
                   {
                     type: "text",
-                    text: "✓",
+                    text: actionType === "delete" ? "🗑️" : "✓",
                     color: "#ffffff",
-                    size: "xxl",
+                    size: actionType === "delete" ? "xl" : "xxl",
                     weight: "bold",
                     align: "center",
                   },
@@ -290,29 +316,17 @@ function buildFlexMessage(data, isUpdate = false) {
         paddingAll: "16px",
         contents: bodyContents,
       },
-      footer: {
-        type: "box",
-        layout: "horizontal",
-        spacing: "sm",
-        backgroundColor: "#0f172a",
-        paddingAll: "12px",
-        contents: [
-          {
-            type: "button",
-            action: { type: "uri", label: "📞 โทรออก", uri: `tel:${data.phone}` },
-            style: "secondary",
-            height: "sm",
-            color: "#1e293b",
-          },
-          {
-            type: "button",
-            action: { type: "uri", label: "✉ ส่งอีเมล", uri: `mailto:${data.email}` },
-            style: "primary",
-            height: "sm",
-            color: "#059669",
-          },
-        ],
-      },
+      footer:
+        footerContents.length > 0
+          ? {
+              type: "box",
+              layout: "horizontal",
+              spacing: "sm",
+              backgroundColor: "#0f172a",
+              paddingAll: "12px",
+              contents: footerContents,
+            }
+          : undefined,
       styles: {
         footer: { separator: true, separatorColor: "#1e293b" },
       },
@@ -320,8 +334,8 @@ function buildFlexMessage(data, isUpdate = false) {
   };
 }
 
-async function sendFlexAndClose(data, isUpdate = false) {
-  const flexMessage = buildFlexMessage(data, isUpdate);
+async function sendFlexAndClose(data, actionType = "create") {
+  const flexMessage = buildFlexMessage(data, actionType);
 
   if (window.liff) {
     try {
@@ -393,7 +407,7 @@ async function showSaveSuccessAndClose(data, isUpdate = false) {
 
   // ถ้า user กด confirm หรือ timer หมด → ส่ง flex และปิด LIFF
   if (result.isConfirmed || result.isDismissed) {
-    await sendFlexAndClose(data, isUpdate);
+    await sendFlexAndClose(data, isUpdate ? "update" : "create");
   }
 }
 
@@ -847,6 +861,17 @@ async function deleteContact(id) {
     }
     if (contactId.value === id) resetForm();
     toast.fire({ icon: "success", title: "ลบรายชื่อแล้ว" });
+
+    // ส่งข้อความแจ้งเตือนลงช่องแชท (ต้องรันใน LINE/LIFF)
+    if (window.liff) {
+      const flexMessage = buildFlexMessage(contact, "delete");
+      window.liff
+        .sendMessages([flexMessage])
+        .then(() => console.log("[LIFF] Delete notification sent"))
+        .catch((err) => {
+          console.warn("[LIFF] delete notification error:", err?.message || err);
+        });
+    }
   } catch (error) {
     Swal.fire("ลบไม่สำเร็จ", error.message, "error");
   }

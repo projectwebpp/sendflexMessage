@@ -507,7 +507,11 @@ function loadSample() {
       footer: {
         type: 'box',
         layout: 'horizontal',
-        contents: [{ type: 'button', style: 'primary', action: { type: 'message', label: 'ตอบรับ', text: 'ตอบรับแล้ว' } }]
+        spacing: 'sm',
+        contents: [
+          { type: 'button', style: 'primary', color: '#ff0000', action: { type: 'uri', label: '📞 โทรออก', uri: 'tel:0888888888' } },
+          { type: 'button', style: 'primary', color: '#059669', action: { type: 'message', label: 'ตอบรับ', text: 'ตอบรับแล้ว' } }
+        ]
       }
     }
   };
