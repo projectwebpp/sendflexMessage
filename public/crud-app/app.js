@@ -228,22 +228,42 @@ function buildFlexMessage(data, actionType = "create") {
 
   const footerContents = [];
   if (actionType !== "delete") {
-    footerContents.push(
-      {
-        type: "button",
-        action: { type: "uri", label: "📞 โทรออก", uri: `tel:${data.phone}` },
-        style: "primary",
-        height: "sm",
-        color: "#ff0000",
+    // แถวที่ 1: โทรออก และ ส่งอีเมล
+    footerContents.push({
+      type: "box",
+      layout: "horizontal",
+      spacing: "sm",
+      contents: [
+        {
+          type: "button",
+          action: { type: "uri", label: "📞 โทรออก", uri: `tel:${data.phone}` },
+          style: "primary",
+          height: "sm",
+          color: "#ff0000",
+        },
+        {
+          type: "button",
+          action: { type: "uri", label: "✉ ส่งอีเมล", uri: `mailto:${data.email}` },
+          style: "primary",
+          height: "sm",
+          color: "#059669",
+        },
+      ],
+    });
+
+    // แถวที่ 2: ลงทะเบียนอีกครั้ง
+    footerContents.push({
+      type: "button",
+      action: {
+        type: "uri",
+        label: "📝 ลงทะเบียนอีกครั้ง",
+        uri: "https://liff.line.me/2010029314-R9ysVoiR",
       },
-      {
-        type: "button",
-        action: { type: "uri", label: "✉ ส่งอีเมล", uri: `mailto:${data.email}` },
-        style: "primary",
-        height: "sm",
-        color: "#059669",
-      },
-    );
+      style: "primary",
+      height: "sm",
+      color: "#2563eb",
+      margin: "sm",
+    });
   }
 
   return {
@@ -320,7 +340,7 @@ function buildFlexMessage(data, actionType = "create") {
         footerContents.length > 0
           ? {
               type: "box",
-              layout: "horizontal",
+              layout: "vertical",
               spacing: "sm",
               backgroundColor: "#0f172a",
               paddingAll: "12px",
