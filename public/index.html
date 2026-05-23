@@ -1116,41 +1116,52 @@ async function onSendClick() {
     let flexMsg;
     try { flexMsg = JSON.parse(jsonRaw); } catch(e) { throw new Error('JSON ผิดพลาด'); }
 
-    // ส่งทีละคนผ่าน LINE API โดยตรง
-    for (let i = 0; i < uids.length; i++) {
-      if (abortSend) { addLog(`⏹ หยุดที่ ${i}/${uids.length}`, 'wn'); break; }
-      const uid = uids[i];
+    // ส่งผ่าน Apps Script เป็น batch (หลีกเลี่ยง CORS)
+    const BATCH = 50; // ส่งครั้งละ 50 คน เพื่ออัปเดต progress ได้
+    const total = uids.length;
+    addLog(`ส่งผ่าน Apps Script (batch ${BATCH})...`, 'nf');
+
+    for (let start = 0; start < total; start += BATCH) {
+      if (abortSend) { addLog(`⏹ หยุดที่ ${start}/${total}`, 'wn'); break; }
+
+      const batch = uids.slice(start, start + BATCH);
       try {
-        const r = await fetch('https://api.line.me/v2/bot/message/push', {
-          method:'POST',
-          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
-          body: JSON.stringify({ to: uid, messages: [flexMsg] }),
-        });
-        if (r.ok) {
-          sentOk++;
-          if (sentOk % 10 === 0 || i < 5) addLog(`✓ [${i+1}/${uids.length}] ส่งสำเร็จ`, 'ok');
-        } else {
-          sentFail++;
-          const e = await r.json().catch(()=>({}));
-          addLog(`✗ [${i+1}] ${e.message || r.status}`, 'er');
+        const res = await fetchWithTimeout(execUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' }, // GS ต้องการ text/plain เพื่อหลีกเลี่ยง preflight
+          body: JSON.stringify({
+            action: 'broadcastBatch',
+            token,
+            uids: batch,
+            flexMessage: flexMsg,
+            delay,
+          }),
+        }, 120000); // 2 นาที timeout ต่อ batch
+
+        const d = await res.json();
+        sentOk   += d.sentOk   || 0;
+        sentFail += d.sentFail || 0;
+
+        const done = Math.min(start + BATCH, total);
+        addLog(`✓ [${done}/${total}] สำเร็จ ${sentOk} | ผิดพลาด ${sentFail}`, d.sentFail > 0 ? 'wn' : 'ok');
+
+        if (d.errors && d.errors.length > 0) {
+          d.errors.forEach(e => addLog(`  ✗ ${e.uid}: ${e.error}`, 'er'));
         }
       } catch(err) {
-        sentFail++;
-        addLog(`✗ ${err.message}`, 'er');
+        sentFail += batch.length;
+        addLog(`✗ batch [${start}–${start+batch.length}] error: ${err.message}`, 'er');
       }
 
       document.getElementById('sSent').textContent = sentOk;
       document.getElementById('sFail').textContent = sentFail;
-      document.getElementById('progBar').style.width = `${Math.round((i+1)/uids.length*100)}%`;
-
-      if (i < uids.length - 1) await sleep(delay);
+      document.getElementById('progBar').style.width = `${Math.round(Math.min(start + BATCH, total) / total * 100)}%`;
     }
 
     const icon = sentFail === 0 ? 'success' : (sentOk === 0 ? 'error' : 'warning');
     addLog(`🎉 เสร็จแล้ว — สำเร็จ ${sentOk} | ผิดพลาด ${sentFail}`, sentOk > 0 ? 'ok' : 'er');
     Toast.fire({ icon, title:`ส่งเสร็จ ${sentOk} คน`, text: sentFail > 0 ? `ผิดพลาด ${sentFail} คน` : '' });
 
-    // รีโหลดประวัติ
     await loadHistory();
 
   } catch(err) {
