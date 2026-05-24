@@ -7,6 +7,9 @@ requiredEnv.forEach((key) => {
   }
 })
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
+  global: { headers: { apikey: process.env.SUPABASE_ANON_KEY } },
+  auth: { persistSession: false },
+})
 
 module.exports = supabase
