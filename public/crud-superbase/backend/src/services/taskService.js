@@ -8,8 +8,8 @@ exports.getAllTasks = async () => {
 
 exports.getTaskById = async (id) => {
   const { data, error } = await supabase.from('tasks').select('*').eq('id', id).single()
-  if (error) throw new Error(error.message)
-  return data
+  if (error && error.code !== 'PGRST116') throw new Error(error.message)
+  return data  // null when not found; controller checks this
 }
 
 exports.createTask = async ({ title, description, status = false }) => {
@@ -33,6 +33,6 @@ exports.updateTask = async (id, fields) => {
 
 exports.deleteTask = async (id) => {
   const { data, error } = await supabase.from('tasks').delete().eq('id', id).select().single()
-  if (error) throw new Error(error.message)
+  if (error && error.code !== 'PGRST116') throw new Error(error.message)
   return data
 }
