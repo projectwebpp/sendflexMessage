@@ -19,7 +19,14 @@ exports.createTask = async ({ title, description, status = false }) => {
 }
 
 exports.updateTask = async (id, fields) => {
-  const { data, error } = await supabase.from('tasks').update(fields).eq('id', id).select().single()
+  const { title, description, status } = fields
+  const allowed = {}
+  if (title !== undefined)       allowed.title = title
+  if (description !== undefined) allowed.description = description
+  if (status !== undefined)      allowed.status = status
+
+  const { data, error } = await supabase
+    .from('tasks').update(allowed).eq('id', id).select().single()
   if (error) throw new Error(error.message)
   return data
 }
