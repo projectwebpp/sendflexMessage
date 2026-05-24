@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Income Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="loadingOverlay" class="loading-overlay hidden" role="status" aria-live="polite" aria-label="กำลังโหลด">
+    <div class="loader-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <strong>กำลังประมวลผล</strong>
+      <span>เชื่อมต่อข้อมูลรายรับรายจ่ายจาก Supabase...</span>
+    </div>
+  </div>
+
+  <main id="authShell" class="auth-shell">
+    <section class="auth-card" aria-labelledby="authTitle">
+      <p class="eyebrow">Private Finance</p>
+      <h1 id="authTitle">เข้าสู่ระบบก่อนใช้งาน</h1>
+      <p class="subtitle">สมัครสมาชิกหรือเข้าสู่ระบบ เพื่อบันทึกและดูเฉพาะรายการรายรับรายจ่ายของคุณเท่านั้น</p>
+
+      <div class="auth-tabs" role="group" aria-label="เลือกโหมดเข้าสู่ระบบ">
+        <button id="loginTab" class="filter-button active" type="button">เข้าสู่ระบบ</button>
+        <button id="registerTab" class="filter-button" type="button">ลงทะเบียน</button>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <label>
+          <span>อีเมล</span>
+          <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+        </label>
+        <label>
+          <span>รหัสผ่าน</span>
+          <input id="loginPassword" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="current-password" required>
+        </label>
+        <button class="primary-button" type="submit">เข้าสู่ระบบ</button>
+      </form>
+
+      <form id="registerForm" class="auth-form hidden">
+        <label>
+          <span>อีเมล</span>
+          <input id="registerEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+        </label>
+        <label>
+          <span>รหัสผ่าน</span>
+          <input id="registerPassword" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password" required>
+        </label>
+        <button class="primary-button" type="submit">ลงทะเบียน</button>
+      </form>
+    </section>
+  </main>
+
+  <main id="appShell" class="app-shell hidden">
+    <section class="workspace" aria-labelledby="page-title">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Income & Expense</p>
+          <h1 id="page-title">บันทึกรายรับรายจ่าย</h1>
+          <p class="subtitle">จัดการรายการเงินเข้า เงินออก และยอดคงเหลือของบัญชีนี้</p>
+        </div>
+        <div class="top-actions">
+          <span id="userEmail" class="user-pill"></span>
+          <button class="icon-button" id="refreshButton" type="button" title="โหลดข้อมูลใหม่" aria-label="โหลดข้อมูลใหม่">↻</button>
+          <button class="secondary-button" id="logoutButton" type="button">ออกจากระบบ</button>
+        </div>
+      </header>
+
+      <section class="summary-grid" aria-label="สรุปรายรับรายจ่าย">
+        <article class="summary-item">
+          <span class="summary-label">รายรับ</span>
+          <strong id="incomeTotal">฿0.00</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">รายจ่าย</span>
+          <strong id="expenseTotal">฿0.00</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">คงเหลือ</span>
+          <strong id="balanceTotal">฿0.00</strong>
+        </article>
+      </section>
+
+      <section class="report-panel" aria-labelledby="report-title">
+        <div class="panel-heading">
+          <div>
+            <h2 id="report-title">รายงานรายรับรายจ่าย</h2>
+            <span>ดูภาพรวมแบบรายวัน รายเดือน และรายปี</span>
+          </div>
+          <div class="filters" role="group" aria-label="โหมดรายงาน">
+            <button class="filter-button active" type="button" data-report="day">วัน</button>
+            <button class="filter-button" type="button" data-report="month">เดือน</button>
+            <button class="filter-button" type="button" data-report="year">ปี</button>
+          </div>
+        </div>
+        <div class="chart-box">
+          <canvas id="financeChart" aria-label="กราฟรายรับรายจ่าย"></canvas>
+        </div>
+        <div id="reportList" class="report-list"></div>
+      </section>
+
+      <section class="composer" aria-labelledby="form-title">
+        <div class="section-heading">
+          <h2 id="form-title">บันทึกรายการใหม่</h2>
+          <span>กรอกข้อมูลรายรับหรือรายจ่ายหลังเข้าสู่ระบบ</span>
+        </div>
+        <form id="transactionForm">
+          <input type="hidden" id="transactionId">
+          <div class="field-grid finance-grid">
+            <label>
+              <span>ประเภท</span>
+              <select id="type" name="type" required>
+                <option value="income">รายรับ</option>
+                <option value="expense">รายจ่าย</option>
+              </select>
+            </label>
+            <label>
+              <span>ชื่อรายการ</span>
+              <input id="title" name="title" type="text" placeholder="เช่น เงินเดือน, ค่าอาหาร" required>
+            </label>
+            <label>
+              <span>จำนวนเงิน</span>
+              <input id="amount" name="amount" type="number" min="0" step="0.01" placeholder="0.00" required>
+            </label>
+            <label>
+              <span>วันที่</span>
+              <input id="transactionDate" name="transactionDate" type="date" required>
+            </label>
+            <label>
+              <span>หมวดหมู่</span>
+              <input id="category" name="category" type="text" placeholder="เช่น งานประจำ, อาหาร, เดินทาง">
+            </label>
+            <label>
+              <span>หมายเหตุ</span>
+              <textarea id="note" name="note" rows="3" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="primary-button" id="submitButton" type="submit">+ บันทึกรายการ</button>
+            <button class="secondary-button hidden" id="cancelEditButton" type="button">ยกเลิกแก้ไข</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="task-panel" aria-labelledby="records-title">
+        <div class="panel-heading">
+          <div>
+            <h2 id="records-title">รายการทั้งหมด</h2>
+            <span>แสดงเฉพาะรายการที่บัญชีนี้บันทึกไว้</span>
+          </div>
+          <div class="filters" role="group" aria-label="ตัวกรองรายการ">
+            <button class="filter-button active" type="button" data-filter="all">ทั้งหมด</button>
+            <button class="filter-button" type="button" data-filter="income">รายรับ</button>
+            <button class="filter-button" type="button" data-filter="expense">รายจ่าย</button>
+          </div>
+        </div>
+
+        <div id="alert" class="alert hidden" role="status"></div>
+        <div id="loading" class="loading hidden">กำลังโหลดข้อมูล...</div>
+        <ul id="transactionList" class="task-list" aria-live="polite"></ul>
+        <div id="emptyState" class="empty-state hidden">
+          <strong>ยังไม่มีรายการ</strong>
+          <span>เริ่มบันทึกรายรับหรือรายจ่ายจากฟอร์มด้านบนได้เลย</span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

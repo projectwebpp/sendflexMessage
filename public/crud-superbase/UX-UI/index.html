@@ -1,0 +1,711 @@
+<!--
+========================================================
+PROFESSIONAL ENTERPRISE UX/UI
+TASK MANAGEMENT SYSTEM
+Modern SaaS Dashboard UI
+========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Enterprise Task Manager</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+    rel="stylesheet"
+  />
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+    };
+  </script>
+
+  <style>
+
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(99,102,241,.15), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(168,85,247,.15), transparent 30%);
+    }
+
+    .glass {
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.75);
+    }
+
+    .dark .glass {
+      background: rgba(15,23,42,.75);
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+      background: #4f46e5;
+      border-radius: 999px;
+    }
+
+  </style>
+
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-white transition-all duration-300">
+
+  <!-- APP -->
+  <div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-80 hidden xl:flex flex-col border-r border-white/20 dark:border-slate-800 glass">
+
+      <!-- LOGO -->
+      <div class="px-8 py-8 border-b border-white/20 dark:border-slate-800">
+
+        <div class="flex items-center gap-4">
+
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <i class="fa-solid fa-layer-group text-white text-xl"></i>
+          </div>
+
+          <div>
+            <h1 class="text-2xl font-black">
+              TaskFlow
+            </h1>
+
+            <p class="text-slate-500 dark:text-slate-400 text-sm">
+              Enterprise Workspace
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- MENU -->
+      <div class="flex-1 overflow-y-auto sidebar-scroll px-5 py-6">
+
+        <p class="text-xs uppercase tracking-widest text-slate-400 mb-4 px-4">
+          Main Menu
+        </p>
+
+        <nav class="space-y-2">
+
+          <!-- ACTIVE -->
+          <a href="#"
+            class="group flex items-center justify-between px-5 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20">
+
+            <div class="flex items-center gap-4">
+              <i class="fa-solid fa-chart-pie"></i>
+              Dashboard
+            </div>
+
+            <span class="text-xs bg-white/20 px-2 py-1 rounded-full">
+              Live
+            </span>
+
+          </a>
+
+          <a href="#"
+            class="group flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-white/70 dark:hover:bg-slate-800 transition">
+
+            <i class="fa-solid fa-list-check text-indigo-500"></i>
+            Tasks
+
+          </a>
+
+          <a href="#"
+            class="group flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-white/70 dark:hover:bg-slate-800 transition">
+
+            <i class="fa-solid fa-users text-pink-500"></i>
+            Teams
+
+          </a>
+
+          <a href="#"
+            class="group flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-white/70 dark:hover:bg-slate-800 transition">
+
+            <i class="fa-solid fa-calendar-days text-green-500"></i>
+            Calendar
+
+          </a>
+
+          <a href="#"
+            class="group flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-white/70 dark:hover:bg-slate-800 transition">
+
+            <i class="fa-solid fa-chart-line text-orange-500"></i>
+            Analytics
+
+          </a>
+
+          <a href="#"
+            class="group flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-white/70 dark:hover:bg-slate-800 transition">
+
+            <i class="fa-solid fa-gear text-slate-500"></i>
+            Settings
+
+          </a>
+
+        </nav>
+
+      </div>
+
+      <!-- USER -->
+      <div class="p-5 border-t border-white/20 dark:border-slate-800">
+
+        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/60 dark:bg-slate-900">
+
+          <img
+            src="https://i.pravatar.cc/100"
+            class="w-14 h-14 rounded-2xl object-cover"
+          />
+
+          <div class="flex-1">
+
+            <h3 class="font-bold">
+              Admin User
+            </h3>
+
+            <p class="text-sm text-slate-500">
+              Full Stack Developer
+            </p>
+
+          </div>
+
+          <button class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 overflow-hidden">
+
+      <!-- TOPBAR -->
+      <header class="sticky top-0 z-50 border-b border-white/20 dark:border-slate-800 glass">
+
+        <div class="px-8 py-5 flex items-center justify-between">
+
+          <!-- LEFT -->
+          <div>
+
+            <h2 class="text-3xl font-black">
+              Dashboard Overview
+            </h2>
+
+            <p class="text-slate-500 mt-1">
+              Welcome back 👋 Here's what's happening today.
+            </p>
+
+          </div>
+
+          <!-- RIGHT -->
+          <div class="flex items-center gap-4">
+
+            <!-- SEARCH -->
+            <div class="relative hidden lg:block">
+
+              <input
+                type="text"
+                placeholder="Search tasks, projects..."
+                class="w-96 pl-12 pr-5 py-4 rounded-2xl bg-white/80 dark:bg-slate-900 border border-white/20 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+
+              <i class="fa-solid fa-magnifying-glass absolute left-5 top-5 text-slate-400"></i>
+
+            </div>
+
+            <!-- NOTIFICATION -->
+            <button class="relative w-14 h-14 rounded-2xl bg-white/80 dark:bg-slate-900 border border-white/20 dark:border-slate-700">
+
+              <i class="fa-solid fa-bell"></i>
+
+              <span class="absolute top-3 right-3 w-3 h-3 rounded-full bg-red-500"></span>
+
+            </button>
+
+            <!-- DARK -->
+            <button
+              id="themeToggle"
+              class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20"
+            >
+              <i class="fa-solid fa-moon"></i>
+            </button>
+
+          </div>
+
+        </div>
+
+      </header>
+
+      <!-- BODY -->
+      <div class="p-8 overflow-y-auto h-[calc(100vh-96px)]">
+
+        <!-- STATS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mb-8">
+
+          <!-- CARD -->
+          <div class="glass rounded-3xl p-7 border border-white/20 dark:border-slate-800 shadow-xl">
+
+            <div class="flex items-start justify-between">
+
+              <div>
+
+                <p class="text-slate-500 mb-3">
+                  Total Tasks
+                </p>
+
+                <h3 class="text-5xl font-black">
+                  1,248
+                </h3>
+
+                <div class="mt-4 flex items-center gap-2 text-green-500">
+                  <i class="fa-solid fa-arrow-trend-up"></i>
+                  +12% this month
+                </div>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-500 text-2xl">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- CARD -->
+          <div class="glass rounded-3xl p-7 border border-white/20 dark:border-slate-800 shadow-xl">
+
+            <div class="flex items-start justify-between">
+
+              <div>
+
+                <p class="text-slate-500 mb-3">
+                  Completed
+                </p>
+
+                <h3 class="text-5xl font-black text-green-500">
+                  924
+                </h3>
+
+                <div class="mt-4 flex items-center gap-2 text-green-500">
+                  <i class="fa-solid fa-circle-check"></i>
+                  Success rate 87%
+                </div>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center text-green-500 text-2xl">
+                <i class="fa-solid fa-check"></i>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- CARD -->
+          <div class="glass rounded-3xl p-7 border border-white/20 dark:border-slate-800 shadow-xl">
+
+            <div class="flex items-start justify-between">
+
+              <div>
+
+                <p class="text-slate-500 mb-3">
+                  In Progress
+                </p>
+
+                <h3 class="text-5xl font-black text-yellow-500">
+                  213
+                </h3>
+
+                <div class="mt-4 flex items-center gap-2 text-yellow-500">
+                  <i class="fa-solid fa-clock"></i>
+                  Active sprint
+                </div>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-yellow-500/20 flex items-center justify-center text-yellow-500 text-2xl">
+                <i class="fa-solid fa-spinner"></i>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- CARD -->
+          <div class="glass rounded-3xl p-7 border border-white/20 dark:border-slate-800 shadow-xl">
+
+            <div class="flex items-start justify-between">
+
+              <div>
+
+                <p class="text-slate-500 mb-3">
+                  Revenue
+                </p>
+
+                <h3 class="text-5xl font-black text-pink-500">
+                  $84K
+                </h3>
+
+                <div class="mt-4 flex items-center gap-2 text-pink-500">
+                  <i class="fa-solid fa-chart-line"></i>
+                  +18% growth
+                </div>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-pink-500/20 flex items-center justify-center text-pink-500 text-2xl">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- CONTENT GRID -->
+        <div class="grid grid-cols-1 2xl:grid-cols-3 gap-8">
+
+          <!-- TASK TABLE -->
+          <div class="2xl:col-span-2 glass rounded-3xl border border-white/20 dark:border-slate-800 shadow-xl overflow-hidden">
+
+            <!-- HEADER -->
+            <div class="p-7 border-b border-white/20 dark:border-slate-800 flex items-center justify-between">
+
+              <div>
+
+                <h3 class="text-2xl font-black">
+                  Active Tasks
+                </h3>
+
+                <p class="text-slate-500 mt-1">
+                  Team progress and task management
+                </p>
+
+              </div>
+
+              <button
+                onclick="createTask()"
+                class="px-6 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-xl shadow-indigo-500/20 hover:scale-105 transition"
+              >
+                <i class="fa-solid fa-plus mr-2"></i>
+                New Task
+              </button>
+
+            </div>
+
+            <!-- TABLE -->
+            <div class="overflow-x-auto">
+
+              <table class="w-full">
+
+                <thead class="bg-white/40 dark:bg-slate-900">
+
+                  <tr>
+
+                    <th class="text-left px-7 py-5 text-sm text-slate-500 uppercase tracking-wider">
+                      Task
+                    </th>
+
+                    <th class="text-left px-7 py-5 text-sm text-slate-500 uppercase tracking-wider">
+                      Priority
+                    </th>
+
+                    <th class="text-left px-7 py-5 text-sm text-slate-500 uppercase tracking-wider">
+                      Status
+                    </th>
+
+                    <th class="text-right px-7 py-5 text-sm text-slate-500 uppercase tracking-wider">
+                      Action
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  <!-- ROW -->
+                  <tr class="border-t border-white/10 hover:bg-white/40 dark:hover:bg-slate-900 transition">
+
+                    <td class="px-7 py-6">
+
+                      <div class="flex items-center gap-4">
+
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                          <i class="fa-solid fa-code"></i>
+                        </div>
+
+                        <div>
+
+                          <h4 class="font-bold text-lg">
+                            Build API Authentication
+                          </h4>
+
+                          <p class="text-slate-500 text-sm mt-1">
+                            JWT + Supabase integration
+                          </p>
+
+                        </div>
+
+                      </div>
+
+                    </td>
+
+                    <td class="px-7 py-6">
+
+                      <span class="px-4 py-2 rounded-full bg-red-500/20 text-red-500 text-sm font-semibold">
+                        High
+                      </span>
+
+                    </td>
+
+                    <td class="px-7 py-6">
+
+                      <span class="px-4 py-2 rounded-full bg-yellow-500/20 text-yellow-500 text-sm font-semibold">
+                        In Progress
+                      </span>
+
+                    </td>
+
+                    <td class="px-7 py-6">
+
+                      <div class="flex justify-end gap-3">
+
+                        <button class="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-500 hover:scale-105 transition">
+                          <i class="fa-solid fa-pen"></i>
+                        </button>
+
+                        <button
+                          onclick="deleteTask()"
+                          class="w-12 h-12 rounded-2xl bg-red-500/20 text-red-500 hover:scale-105 transition"
+                        >
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+          <!-- ACTIVITY -->
+          <div class="glass rounded-3xl border border-white/20 dark:border-slate-800 shadow-xl p-7">
+
+            <div class="flex items-center justify-between mb-8">
+
+              <div>
+
+                <h3 class="text-2xl font-black">
+                  Activity
+                </h3>
+
+                <p class="text-slate-500 mt-1">
+                  Recent updates
+                </p>
+
+              </div>
+
+              <button class="text-indigo-500 font-semibold">
+                View All
+              </button>
+
+            </div>
+
+            <div class="space-y-6">
+
+              <!-- ITEM -->
+              <div class="flex gap-4">
+
+                <div class="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center text-green-500">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+
+                <div>
+
+                  <h4 class="font-bold">
+                    API Deployment Completed
+                  </h4>
+
+                  <p class="text-slate-500 text-sm mt-1">
+                    Backend deployed successfully on Render
+                  </p>
+
+                  <span class="text-xs text-slate-400 mt-2 block">
+                    2 mins ago
+                  </span>
+
+                </div>
+
+              </div>
+
+              <!-- ITEM -->
+              <div class="flex gap-4">
+
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                  <i class="fa-solid fa-code"></i>
+                </div>
+
+                <div>
+
+                  <h4 class="font-bold">
+                    Frontend Updated
+                  </h4>
+
+                  <p class="text-slate-500 text-sm mt-1">
+                    Dashboard UI improved with animations
+                  </p>
+
+                  <span class="text-xs text-slate-400 mt-2 block">
+                    15 mins ago
+                  </span>
+
+                </div>
+
+              </div>
+
+              <!-- ITEM -->
+              <div class="flex gap-4">
+
+                <div class="w-12 h-12 rounded-2xl bg-pink-500/20 flex items-center justify-center text-pink-500">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div>
+
+                  <h4 class="font-bold">
+                    New Team Member
+                  </h4>
+
+                  <p class="text-slate-500 text-sm mt-1">
+                    John joined the workspace
+                  </p>
+
+                  <span class="text-xs text-slate-400 mt-2 block">
+                    1 hour ago
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+
+    // DARK MODE
+    document.getElementById("themeToggle")
+      .addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+      });
+
+    // CREATE TASK
+    function createTask() {
+
+      Swal.fire({
+        title: "Create New Task",
+        html: `
+          <input
+            id="title"
+            class="swal2-input"
+            placeholder="Task title"
+          />
+
+          <textarea
+            id="desc"
+            class="swal2-textarea"
+            placeholder="Task description"
+          ></textarea>
+        `,
+        confirmButtonText: "Create Task",
+        confirmButtonColor: "#4f46e5",
+        background: "#0f172a",
+        color: "#fff",
+      });
+
+    }
+
+    // DELETE TASK
+    function deleteTask() {
+
+      Swal.fire({
+        title: "Delete Task?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#475569",
+        confirmButtonText: "Delete",
+      }).then((result) => {
+
+        if (result.isConfirmed) {
+
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "Task removed successfully.",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+
+        }
+
+      });
+
+    }
+
+  </script>
+
+</body>
+</html>

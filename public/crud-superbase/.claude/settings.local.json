@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node src/server.js)",
+      "Bash(curl -sv http://localhost:3001/tasks)"
+    ]
+  }
+}

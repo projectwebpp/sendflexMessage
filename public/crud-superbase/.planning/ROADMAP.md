@@ -21,7 +21,9 @@
 **Goal:** Vite + React app with layout system, sidebar, topbar, routing, and theme toggle wired up.
 
 ### Plans
-- [02-01] Frontend Setup & Layout — Vite scaffold, Tailwind config, Inter font, React Router, Sidebar, Topbar, ThemeToggle, dark mode store
+- [ ] 02-01-PLAN.md — Vite scaffold + Tailwind v3 + index.html shell (anti-flash IIFE, FA + Inter CDN, .glass + body gradient)
+- [ ] 02-02-PLAN.md — Zustand stores (themeStore + uiStore) + React Router v6 Layout/Outlet wiring (depends on 02-01)
+- [ ] 02-03-PLAN.md — Sidebar + Topbar + ThemeToggle + page stubs; production build + human UAT (depends on 02-02)
 
 ---
 
@@ -51,6 +53,6 @@
 | Phase | Focus | Plans | Status |
 |-------|-------|-------|--------|
 | 01 | 2/2 | Complete   | 2026-05-24 |
-| 02 | Frontend Foundation | 1 | not_started |
+| 02 | Frontend Foundation | 3 | not_started |
 | 03 | Features & Integration | 2 | not_started |
 | 04 | Polish & Delivery | 2 | not_started |

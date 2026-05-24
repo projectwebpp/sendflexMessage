@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="workspace" aria-labelledby="page-title">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Supabase CRUD</p>
+          <h1 id="page-title">Task Manager</h1>
+        </div>
+        <button class="icon-button" id="refreshButton" type="button" title="โหลดข้อมูลใหม่" aria-label="โหลดข้อมูลใหม่">
+          ↻
+        </button>
+      </header>
+
+      <section class="summary-grid" aria-label="สรุปงาน">
+        <article class="summary-item">
+          <span class="summary-label">ทั้งหมด</span>
+          <strong id="totalCount">0</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">ยังไม่เสร็จ</span>
+          <strong id="activeCount">0</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">เสร็จแล้ว</span>
+          <strong id="doneCount">0</strong>
+        </article>
+      </section>
+
+      <section class="composer" aria-labelledby="form-title">
+        <h2 id="form-title">เพิ่มงานใหม่</h2>
+        <form id="taskForm">
+          <input type="hidden" id="taskId">
+          <div class="field-grid">
+            <label>
+              <span>ชื่องาน</span>
+              <input id="title" name="title" type="text" placeholder="เช่น ออกแบบหน้าเว็บ Todo" required>
+            </label>
+            <label>
+              <span>รายละเอียด</span>
+              <textarea id="description" name="description" rows="3" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+            </label>
+          </div>
+          <label class="status-toggle">
+            <input id="status" name="status" type="checkbox">
+            <span>ทำเสร็จแล้ว</span>
+          </label>
+          <div class="form-actions">
+            <button class="primary-button" id="submitButton" type="submit">+ บันทึกงาน</button>
+            <button class="secondary-button hidden" id="cancelEditButton" type="button">ยกเลิกแก้ไข</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="task-panel" aria-labelledby="tasks-title">
+        <div class="panel-heading">
+          <h2 id="tasks-title">รายการงาน</h2>
+          <div class="filters" role="group" aria-label="ตัวกรองงาน">
+            <button class="filter-button active" type="button" data-filter="all">ทั้งหมด</button>
+            <button class="filter-button" type="button" data-filter="active">ยังไม่เสร็จ</button>
+            <button class="filter-button" type="button" data-filter="done">เสร็จแล้ว</button>
+          </div>
+        </div>
+
+        <div id="alert" class="alert hidden" role="status"></div>
+        <div id="loading" class="loading hidden">กำลังโหลดข้อมูล...</div>
+        <ul id="taskList" class="task-list" aria-live="polite"></ul>
+        <div id="emptyState" class="empty-state hidden">
+          <strong>ยังไม่มีงาน</strong>
+          <span>เพิ่มงานแรกจากฟอร์มด้านบนได้เลย</span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
