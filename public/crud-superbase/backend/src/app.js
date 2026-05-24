@@ -5,7 +5,10 @@ const { notFound, errorHandler } = require('./middlewares/errorMiddleware')
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}))
 app.use(express.json())
 
 const taskRoutes = require('./routes/taskRoutes')
