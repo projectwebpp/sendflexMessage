@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SheetShare Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        body { font-family: 'Kanit', sans-serif; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    </style>
+</head>
+<body class="bg-slate-100 flex justify-center min-h-screen">
+
+<!-- ══════════════ หน้า LOGIN ══════════════ -->
+<div id="pageLogin" class="hidden w-full max-w-md bg-white min-h-screen shadow-lg flex flex-col justify-center px-8 py-12">
+    <div class="text-center mb-10">
+        <div class="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-lg">
+            <i class="fa-solid fa-file-excel text-white text-3xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800">SheetShare Manager</h1>
+        <p class="text-sm text-slate-400 mt-1">เข้าสู่ระบบเพื่อจัดการลิงก์ของคุณ</p>
+    </div>
+
+    <!-- Google Sign-In -->
+    <button onclick="loginWithGoogle()" id="btnGoogleLogin"
+        class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 font-semibold py-3 rounded-xl transition-all shadow-sm mb-4">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        เข้าสู่ระบบด้วย Google
+    </button>
+
+    <div class="relative mb-4">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+        <div class="relative flex justify-center"><span class="bg-white px-3 text-xs text-slate-400">หรือใช้อีเมล</span></div>
+    </div>
+
+    <!-- Email Login -->
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div class="relative">
+            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="email" id="loginEmail" required autocomplete="email"
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                placeholder="your@email.com">
+        </div>
+        <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="password" id="loginPassword" required autocomplete="current-password"
+                class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                placeholder="รหัสผ่าน">
+            <button type="button" onclick="toggleLoginPw()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                <i id="loginEye" class="fa-solid fa-eye text-sm"></i>
+            </button>
+        </div>
+        <button type="submit" id="loginBtn"
+            class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold py-3 rounded-xl shadow-md hover:opacity-90 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+        </button>
+    </form>
+
+    <div class="relative my-4">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+        <div class="relative flex justify-center"><span class="bg-white px-3 text-xs text-slate-400">ยังไม่มีบัญชี?</span></div>
+    </div>
+
+    <button onclick="showRegister()"
+        class="w-full border border-slate-200 text-slate-600 font-medium py-3 rounded-xl hover:bg-slate-50 text-sm flex items-center justify-center gap-2">
+        <i class="fa-solid fa-user-plus"></i> สมัครสมาชิกใหม่
+    </button>
+
+    <div id="registerSection" class="hidden mt-4 space-y-3 border-t border-slate-100 pt-4">
+        <p class="text-xs font-semibold text-slate-500 text-center">สร้างบัญชีใหม่</p>
+        <div class="relative">
+            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="email" id="regEmail" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-500" placeholder="อีเมลสำหรับสมัคร">
+        </div>
+        <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="password" id="regPassword" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-500" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)">
+        </div>
+        <button onclick="handleRegister()" class="w-full bg-teal-500 text-white font-semibold py-3 rounded-xl hover:bg-teal-600 text-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> สมัครสมาชิก
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════ หน้า MAIN ══════════════ -->
+<div id="pageMain" class="hidden w-full max-w-md bg-white min-h-screen shadow-lg flex flex-col justify-between relative pb-20">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 pt-8 pb-5 rounded-b-3xl shadow-md">
+        <div class="flex justify-between items-start">
+            <div class="min-w-0">
+                <h1 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel text-2xl shrink-0"></i> SheetShare Manager
+                </h1>
+                <p id="userEmailDisplay" class="text-xs text-emerald-100 mt-0.5 truncate"></p>
+            </div>
+            <div class="flex gap-2 shrink-0 ml-2">
+                <button onclick="openModal()" class="bg-white/20 hover:bg-white/30 p-2.5 rounded-full transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+                <button onclick="handleSignOut()" class="bg-white/20 hover:bg-white/30 p-2.5 rounded-full transition-all" title="ออกจากระบบ">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Google Drive Status Bar -->
+        <div id="driveBar" class="mt-4 flex items-center justify-between bg-white/10 rounded-2xl px-3 py-2">
+            <div class="flex items-center gap-2 min-w-0">
+                <div id="driveDot" class="w-2 h-2 rounded-full bg-slate-300 shrink-0"></div>
+                <span id="driveLabel" class="text-xs text-white/80 truncate">Google Drive: ยังไม่เชื่อมต่อ</span>
+            </div>
+            <button id="btnDriveConnect" onclick="connectDrive()"
+                class="text-[10px] bg-white text-emerald-700 font-semibold px-3 py-1 rounded-full hover:bg-emerald-50 transition-colors flex items-center gap-1 shrink-0 ml-2">
+                <svg class="w-3 h-3" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                เชื่อมต่อ Drive
+            </button>
+            <button id="btnDriveDisconnect" onclick="disconnectDrive()"
+                class="hidden text-[10px] bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-full transition-colors shrink-0 ml-2">
+                ยกเลิก
+            </button>
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="flex-1 px-4 py-5 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 px-1">
+            <h2 class="text-sm font-semibold text-slate-500">ลิงก์ทั้งหมด</h2>
+            <span id="syncBadge" class="hidden text-[10px] text-teal-600 flex items-center gap-1">
+                <i class="fa-solid fa-rotate spinner"></i> กำลังซิงค์...
+            </span>
+        </div>
+        <div id="linkList" class="space-y-4">
+            <div class="text-center py-12 text-slate-400">
+                <i class="fa-solid fa-rotate spinner text-3xl mb-3 block text-emerald-400"></i>
+                <p class="text-sm">กำลังโหลด...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center text-slate-400">
+        <button class="flex flex-col items-center gap-1 text-emerald-500">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[10px]">หน้าแรก</span>
+        </button>
+        <button onclick="openModal()" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition-colors">
+            <i class="fa-solid fa-circle-plus text-lg"></i>
+            <span class="text-[10px]">เพิ่มลิงก์</span>
+        </button>
+        <button onclick="loadLinks()" class="flex flex-col items-center gap-1 hover:text-emerald-500 transition-colors">
+            <i class="fa-solid fa-rotate text-lg"></i>
+            <span class="text-[10px]">อัปเดต</span>
+        </button>
+    </div>
+
+    <!-- Modal: เพิ่ม/แก้ไข -->
+    <div id="linkModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-800">เพิ่มลิงก์ Google Sheet</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="linkForm" onsubmit="saveLink(event)" class="space-y-4">
+                <input type="hidden" id="linkId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ชื่อไฟล์</label>
+                    <input type="text" id="fileName" required
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                        placeholder="เช่น รายงานยอดขายประจำเดือน">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Google Sheet URL</label>
+                    <input type="url" id="fileUrl" required
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                        placeholder="https://docs.google.com/spreadsheets/d/...">
+                </div>
+                <div class="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-200">
+                    <p class="text-xs font-bold text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-teal-500"></i> ตั้งค่าการเข้าถึง
+                    </p>
+                    <select id="accessLevel" onchange="toggleAccessLevel()"
+                        class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500">
+                        <option value="public">สาธารณะ — ทุกคนเข้าได้</option>
+                        <option value="password">ใช้รหัสผ่าน</option>
+                        <option value="restricted">เฉพาะที่อนุญาต</option>
+                    </select>
+                    <div id="passwordField" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">รหัสผ่านไฟล์</label>
+                        <div class="relative">
+                            <input type="password" id="accessPassword"
+                                class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 pr-10"
+                                placeholder="ตั้งรหัสผ่าน">
+                            <button type="button" onclick="toggleFilePwVis()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                <i id="filePwEye" class="fa-solid fa-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">หมายเหตุ</label>
+                        <input type="text" id="accessNote"
+                            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                            placeholder="เช่น สำหรับทีม Marketing">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">เปิดเข้าถึงวันที่</label>
+                        <input type="datetime-local" id="startTime"
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">ปิดเข้าถึงวันที่</label>
+                        <input type="datetime-local" id="endTime"
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <div class="bg-amber-50 text-amber-800 p-3 rounded-xl text-xs flex gap-2 items-start">
+                    <i class="fa-solid fa-circle-info mt-0.5 shrink-0"></i>
+                    <span>หากไม่ระบุวันเวลา ระบบจะอ้างอิงตามปุ่มเปิด-ปิดแชร์</span>
+                </div>
+                <button type="submit" id="submitBtn"
+                    class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium py-3 rounded-xl shadow-md hover:opacity-90 text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> บันทึก
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: รหัสผ่านไฟล์ -->
+    <div id="passwordModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="text-center">
+                <div class="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-lock text-amber-500 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-800">ไฟล์ต้องใช้รหัสผ่าน</h3>
+                <p id="pwModalName" class="text-sm text-slate-500 mt-1"></p>
+            </div>
+            <input type="password" id="pwInput"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                placeholder="ป้อนรหัสผ่าน" onkeydown="if(event.key==='Enter') confirmPassword()">
+            <div class="flex gap-3">
+                <button onclick="closePwModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600">ยกเลิก</button>
+                <button onclick="confirmPassword()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-medium">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  SUPABASE CLIENT
+// ════════════════════════════════════════════════════════════
+const { createClient } = supabase;
+const sb = createClient(
+    'https://dozxxknekdhnvpbfetib.supabase.co',
+    'sb_publishable_56uJhm9sp4SbzzwWgO3P6Q_oboIl3Jo'
+);
+const TABLE = 'sheet_links';
+
+function authHeaders() {
+    const token = currentSession?.access_token;
+    return {
+        'apikey':        'sb_publishable_56uJhm9sp4SbzzwWgO3P6Q_oboIl3Jo',
+        'Authorization': `Bearer ${token || 'sb_publishable_56uJhm9sp4SbzzwWgO3P6Q_oboIl3Jo'}`,
+        'Content-Type':  'application/json',
+        'Prefer':        'return=representation'
+    };
+}
+
+async function sbFetch(path, options = {}) {
+    const res = await fetch(
+        `https://dozxxknekdhnvpbfetib.supabase.co/rest/v1/${TABLE}${path}`,
+        { headers: authHeaders(), ...options }
+    );
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : [];
+}
+
+// ════════════════════════════════════════════════════════════
+//  AUTH STATE
+// ════════════════════════════════════════════════════════════
+let currentSession = null;
+let driveToken     = null;
+let driveTokenExp  = 0;
+let pendingToggleId = null;
+
+function isDriveAuthed() { return !!driveToken && Date.now() < driveTokenExp; }
+
+async function initAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    applySession(session);
+
+    sb.auth.onAuthStateChange((_event, session) => {
+        applySession(session);
+        if (session) showMain(session.user);
+        else showLogin();
+    });
+
+    if (session) showMain(session.user);
+    else showLogin();
+}
+
+function applySession(session) {
+    currentSession = session;
+    // ดึง Drive token จาก Google provider_token (ถ้า login ด้วย Google)
+    if (session?.provider_token) {
+        driveToken    = session.provider_token;
+        driveTokenExp = Date.now() + 3500 * 1000; // ~1 ชม.
+    }
+}
+
+function showLogin() {
+    document.getElementById('pageLogin').classList.remove('hidden');
+    document.getElementById('pageMain').classList.add('hidden');
+}
+
+function showMain(user) {
+    document.getElementById('pageLogin').classList.add('hidden');
+    document.getElementById('pageMain').classList.remove('hidden');
+    document.getElementById('userEmailDisplay').textContent = user.email;
+    updateDriveUI();
+    loadLinks();
+    setInterval(checkAllStatus, 30000);
+}
+
+// ─── Google Login (เข้าระบบ + ได้ Drive token พร้อมกัน) ─────
+async function loginWithGoogle() {
+    const btn = document.getElementById('btnGoogleLogin');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-rotate spinner mr-2"></i> กำลังเชื่อมต่อ...';
+
+    const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            // ขอ scope Drive ไปพร้อมกันเลย
+            scopes: 'https://www.googleapis.com/auth/drive',
+            redirectTo: window.location.href,
+            queryParams: { access_type: 'offline', prompt: 'select_account' }
+        }
+    });
+
+    if (error) {
+        showError('เข้าสู่ระบบไม่สำเร็จ', error.message);
+        btn.disabled = false;
+        btn.innerHTML = `<svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> เข้าสู่ระบบด้วย Google`;
+    }
+    // ถ้าสำเร็จ — redirect ออกไป Google แล้วกลับมา, onAuthStateChange จะทำงานเอง
+}
+
+// ─── Email Login ─────────────────────────────────────────────
+async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-rotate spinner"></i> กำลังเข้าสู่ระบบ...';
+
+    const { error } = await sb.auth.signInWithPassword({
+        email:    document.getElementById('loginEmail').value.trim(),
+        password: document.getElementById('loginPassword').value
+    });
+
+    if (error) {
+        Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ',
+            text: error.message.includes('Invalid login') ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' : error.message,
+            confirmButtonColor: '#10b981' });
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ';
+}
+
+// ─── Register ─────────────────────────────────────────────────
+async function handleRegister() {
+    const email    = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    if (!email || password.length < 6) { toast('warning', 'กรอกอีเมลและรหัสผ่านอย่างน้อย 6 ตัว'); return; }
+
+    const { error } = await sb.auth.signUp({ email, password });
+    if (error) {
+        const exists = error.message.toLowerCase().includes('already');
+        if (exists) {
+            const r = await Swal.fire({
+                icon: 'info', title: 'มีบัญชีนี้อยู่แล้ว',
+                text: 'ต้องการเข้าสู่ระบบเลยไหม?',
+                showCancelButton: true, confirmButtonText: 'เข้าสู่ระบบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#10b981'
+            });
+            if (r.isConfirmed) {
+                document.getElementById('loginEmail').value    = email;
+                document.getElementById('loginPassword').value = password;
+                document.getElementById('registerSection').classList.add('hidden');
+                document.getElementById('loginPassword').focus();
+            }
+        } else {
+            showError('สมัครไม่สำเร็จ', error.message);
+        }
+    } else {
+        Swal.fire({ icon: 'success', title: 'สมัครสำเร็จ!', text: 'กรุณาตรวจสอบอีเมลเพื่อยืนยัน แล้วเข้าสู่ระบบ', confirmButtonColor: '#10b981' });
+        document.getElementById('registerSection').classList.add('hidden');
+    }
+}
+
+async function handleSignOut() {
+    const r = await Swal.fire({ title: 'ออกจากระบบ?', icon: 'question',
+        showCancelButton: true, confirmButtonText: 'ออก', cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#ef4444', cancelButtonColor: '#64748b' });
+    if (r.isConfirmed) {
+        driveToken = null;
+        links = [];
+        await sb.auth.signOut();
+    }
+}
+
+function showRegister() { document.getElementById('registerSection').classList.toggle('hidden'); }
+
+function toggleLoginPw() {
+    const inp = document.getElementById('loginPassword');
+    const eye = document.getElementById('loginEye');
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+    eye.className = inp.type === 'text' ? 'fa-solid fa-eye-slash text-sm' : 'fa-solid fa-eye text-sm';
+}
+
+// ════════════════════════════════════════════════════════════
+//  GOOGLE DRIVE CONNECT (สำหรับ user ที่ login ด้วย Email)
+// ════════════════════════════════════════════════════════════
+async function connectDrive() {
+    // เด้งไป Google เพื่อขอ Drive scope แล้วกลับมา
+    const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            scopes: 'https://www.googleapis.com/auth/drive',
+            redirectTo: window.location.href,
+            queryParams: { access_type: 'offline', prompt: 'select_account' }
+        }
+    });
+    if (error) showError('เชื่อมต่อ Drive ไม่สำเร็จ', error.message);
+}
+
+function disconnectDrive() {
+    driveToken    = null;
+    driveTokenExp = 0;
+    updateDriveUI();
+    toast('info', 'ยกเลิกการเชื่อมต่อ Google Drive แล้ว');
+}
+
+function updateDriveUI() {
+    const ok = isDriveAuthed();
+    document.getElementById('driveDot').className   = ok ? 'w-2 h-2 rounded-full bg-green-300 shrink-0' : 'w-2 h-2 rounded-full bg-slate-300 shrink-0';
+    document.getElementById('driveLabel').textContent = ok ? 'Google Drive: เชื่อมต่อแล้ว' : 'Google Drive: ยังไม่เชื่อมต่อ';
+    document.getElementById('btnDriveConnect').classList.toggle('hidden', ok);
+    document.getElementById('btnDriveDisconnect').classList.toggle('hidden', !ok);
+}
+
+// ════════════════════════════════════════════════════════════
+//  DRIVE PERMISSION API
+// ════════════════════════════════════════════════════════════
+function extractFileId(url) {
+    const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+}
+
+async function driveOpenShare(fileId) {
+    const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}/permissions`,
+        {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${driveToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: 'reader', type: 'anyone', allowFileDiscovery: false })
+        }
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || `Drive ${res.status}`);
+    return data.id || 'anyoneWithLink';
+}
+
+async function driveCloseShare(fileId, permissionId) {
+    const pid = permissionId || 'anyoneWithLink';
+    const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}/permissions/${pid}`,
+        { method: 'DELETE', headers: { 'Authorization': `Bearer ${driveToken}` } }
+    );
+    if (!res.ok && res.status !== 404) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error?.message || `Drive ${res.status}`);
+    }
+}
+
+// ════════════════════════════════════════════════════════════
+//  LINK DATA
+// ════════════════════════════════════════════════════════════
+let links = [];
+let pendingAccessId = null;
+
+async function loadLinks() {
+    showSync(true);
+    try {
+        links = await sbFetch('?order=created_at.desc');
+        checkAllStatus();
+    } catch (e) {
+        showError('โหลดข้อมูลไม่สำเร็จ', e.message);
+        renderLinks();
+    } finally { showSync(false); }
+}
+
+async function createLink(p) { return sbFetch('', { method: 'POST', body: JSON.stringify(p) }); }
+async function updateLink(id, p) { return sbFetch(`?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(p) }); }
+
+async function deleteLink(id) {
+    const r = await Swal.fire({ title: 'ยืนยันการลบ?', text: 'ข้อมูลจะหายถาวร', icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#64748b',
+        confirmButtonText: 'ลบเลย', cancelButtonText: 'ยกเลิก' });
+    if (!r.isConfirmed) return;
+
+    const link = links.find(l => l.id === id);
+    if (link?.anyone_permission_id && isDriveAuthed()) {
+        const fid = extractFileId(link.url);
+        if (fid) await driveCloseShare(fid, link.anyone_permission_id).catch(() => {});
+    }
+    try {
+        await sbFetch(`?id=eq.${id}`, { method: 'DELETE' });
+        links = links.filter(l => l.id !== id);
+        renderLinks();
+        toast('success', 'ลบเรียบร้อย');
+    } catch (e) { showError('ลบไม่สำเร็จ', e.message); }
+}
+
+// ════════════════════════════════════════════════════════════
+//  MODAL
+// ════════════════════════════════════════════════════════════
+function openModal(id = null) {
+    document.getElementById('linkModal').classList.remove('hidden');
+    if (id) {
+        const link = links.find(l => l.id === id);
+        document.getElementById('modalTitle').innerText   = 'แก้ไขข้อมูลลิงก์';
+        document.getElementById('linkId').value           = link.id;
+        document.getElementById('fileName').value         = link.name;
+        document.getElementById('fileUrl').value          = link.url;
+        document.getElementById('startTime').value        = toLocalDatetime(link.start_time);
+        document.getElementById('endTime').value          = toLocalDatetime(link.end_time);
+        document.getElementById('accessLevel').value      = link.access_level || 'public';
+        document.getElementById('accessPassword').value   = link.access_password || '';
+        document.getElementById('accessNote').value       = link.access_note || '';
+    } else {
+        document.getElementById('modalTitle').innerText  = 'เพิ่มลิงก์ Google Sheet';
+        document.getElementById('linkForm').reset();
+        document.getElementById('linkId').value          = '';
+        document.getElementById('accessLevel').value     = 'public';
+    }
+    toggleAccessLevel();
+}
+
+function closeModal() { document.getElementById('linkModal').classList.add('hidden'); }
+function toggleAccessLevel() {
+    document.getElementById('passwordField').classList.toggle('hidden', document.getElementById('accessLevel').value !== 'password');
+}
+
+// ════════════════════════════════════════════════════════════
+//  SAVE
+// ════════════════════════════════════════════════════════════
+async function saveLink(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-rotate spinner"></i> กำลังบันทึก...';
+
+    const id          = document.getElementById('linkId').value;
+    const accessLevel = document.getElementById('accessLevel').value;
+    const accessPw    = document.getElementById('accessPassword').value;
+
+    if (accessLevel === 'password' && !accessPw.trim()) {
+        toast('warning', 'กรุณาตั้งรหัสผ่าน');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> บันทึก';
+        return;
+    }
+
+    const payload = {
+        name:            document.getElementById('fileName').value.trim(),
+        url:             document.getElementById('fileUrl').value.trim(),
+        start_time:      document.getElementById('startTime').value || null,
+        end_time:        document.getElementById('endTime').value   || null,
+        access_level:    accessLevel,
+        access_password: accessLevel === 'password' ? accessPw : null,
+        access_note:     document.getElementById('accessNote').value.trim() || null,
+    };
+
+    try {
+        if (id) {
+            await updateLink(id, payload);
+            const idx = links.findIndex(l => l.id === id);
+            if (idx !== -1) links[idx] = { ...links[idx], ...payload };
+        } else {
+            payload.is_active = false;
+            const created = await createLink(payload);
+            if (Array.isArray(created) && created[0]) links.unshift(created[0]);
+        }
+        closeModal();
+        checkAllStatus();
+        toast('success', id ? 'อัปเดตเรียบร้อย' : 'เพิ่มลิงก์เรียบร้อย');
+    } catch (e) {
+        showError('บันทึกไม่สำเร็จ', e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> บันทึก';
+    }
+}
+
+// ════════════════════════════════════════════════════════════
+//  TOGGLE (Drive API)
+// ════════════════════════════════════════════════════════════
+async function toggleStatus(id) {
+    const link   = links.find(l => l.id === id);
+    const newVal = !link.is_active;
+
+    if (!isDriveAuthed()) {
+        const r = await Swal.fire({
+            icon: 'info',
+            title: newVal ? 'เปิดการแชร์' : 'ปิดการแชร์',
+            html: `<p class="text-sm text-slate-600 mb-3">ต้องการให้เปลี่ยนสิทธิ์ใน <strong>Google Drive จริงๆ</strong><br>หรือแค่อัปเดตสถานะในแอป?</p>`,
+            showDenyButton:     true,
+            showCancelButton:   true,
+            confirmButtonText:  '<svg class="w-4 h-4 inline mr-1" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> เชื่อมต่อ Google Drive',
+            denyButtonText:     'แค่อัปเดตแอป',
+            cancelButtonText:   'ยกเลิก',
+            confirmButtonColor: '#10b981',
+            denyButtonColor:    '#64748b'
+        });
+
+        if (r.isConfirmed) { pendingToggleId = id; connectDrive(); return; }
+        if (r.isDenied) {
+            await updateLink(id, { is_active: newVal }).catch(e => showError('อัปเดตไม่สำเร็จ', e.message));
+            link.is_active = newVal;
+            renderLinks();
+            toast(newVal ? 'success' : 'info', newVal ? 'เปิดสถานะในแอปแล้ว' : 'ปิดสถานะในแอปแล้ว');
+        }
+        return;
+    }
+
+    renderLinks(id);
+    const fileId = extractFileId(link.url);
+    if (!fileId) { toast('error', 'ไม่สามารถอ่าน File ID จาก URL'); return; }
+
+    try {
+        let permId = link.anyone_permission_id;
+        if (newVal) {
+            permId = await driveOpenShare(fileId);
+        } else {
+            await driveCloseShare(fileId, permId);
+            permId = null;
+        }
+        await updateLink(id, { is_active: newVal, anyone_permission_id: permId });
+        link.is_active            = newVal;
+        link.anyone_permission_id = permId;
+        renderLinks();
+        toast(newVal ? 'success' : 'info',
+              newVal ? '✅ เปิดสิทธิ์แชร์ Google Sheet แล้ว'
+                     : '🔒 ปิดสิทธิ์แชร์ Google Sheet แล้ว');
+    } catch (err) {
+        console.error(err);
+        const r2 = await Swal.fire({
+            icon: 'warning', title: 'Drive API ล้มเหลว',
+            html: `<p class="text-sm mb-2">${escHtml(err.message)}</p><p class="text-xs text-slate-500">อัปเดตสถานะในแอปเท่านั้น?</p>`,
+            showCancelButton: true, confirmButtonText: 'อัปเดตแอป', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#f59e0b'
+        });
+        if (r2.isConfirmed) {
+            await updateLink(id, { is_active: newVal }).catch(() => {});
+            link.is_active = newVal;
+        }
+        renderLinks();
+    }
+}
+
+// ════════════════════════════════════════════════════════════
+//  TIME-BASED
+// ════════════════════════════════════════════════════════════
+function checkAllStatus() {
+    const now = new Date(), updates = [];
+    links.forEach(link => {
+        if (!link.start_time && !link.end_time) return;
+        const s = link.start_time ? new Date(link.start_time) : null;
+        const e = link.end_time   ? new Date(link.end_time)   : null;
+        let should = link.is_active;
+        if      (s && now < s)             should = false;
+        else if (e && now > e)             should = false;
+        else if (s && !e && now >= s)      should = true;
+        else if (s && e && now >= s && now <= e) should = true;
+        if (link.is_active !== should) {
+            link.is_active = should;
+            updates.push(updateLink(link.id, { is_active: should }).catch(() => {}));
+        }
+    });
+    if (updates.length) Promise.all(updates);
+    renderLinks();
+}
+
+// ════════════════════════════════════════════════════════════
+//  ACCESS FILE
+// ════════════════════════════════════════════════════════════
+function accessFile(id) {
+    const link = links.find(l => l.id === id);
+    const now  = new Date();
+    let active = link.is_active;
+    if (link.start_time && now < new Date(link.start_time)) active = false;
+    if (link.end_time   && now > new Date(link.end_time))   active = false;
+
+    if (!active) {
+        Swal.fire({ icon: 'error', title: 'ไม่สามารถเข้าถึงได้', text: 'ไฟล์ถูกปิดหรือหมดเวลาแล้ว', confirmButtonColor: '#10b981' });
+        return;
+    }
+    if (link.access_level === 'password') {
+        pendingAccessId = id;
+        document.getElementById('pwModalName').innerText = link.name;
+        document.getElementById('pwInput').value = '';
+        document.getElementById('passwordModal').classList.remove('hidden');
+        return;
+    }
+    if (link.access_level === 'restricted') {
+        Swal.fire({ icon: 'warning', title: 'การเข้าถึงจำกัด',
+            html: `<p class="text-sm">${escHtml(link.access_note || 'กรุณาติดต่อผู้ดูแล')}</p>`,
+            confirmButtonColor: '#10b981', confirmButtonText: 'เข้าถึงไฟล์'
+        }).then(r => { if (r.isConfirmed) openSheet(link.url, link.name); });
+        return;
+    }
+    openSheet(link.url, link.name);
+}
+
+function openSheet(url, name) {
+    Swal.fire({ icon: 'success', title: 'กำลังนำไปยัง Google Sheet', text: name, timer: 1200, showConfirmButton: false })
+        .then(() => window.open(url, '_blank'));
+}
+
+function closePwModal() { document.getElementById('passwordModal').classList.add('hidden'); pendingAccessId = null; }
+function confirmPassword() {
+    const link  = links.find(l => l.id === pendingAccessId);
+    const input = document.getElementById('pwInput').value;
+    if (input === link.access_password) { closePwModal(); openSheet(link.url, link.name); }
+    else {
+        document.getElementById('pwInput').value = '';
+        Swal.fire({ icon: 'error', title: 'รหัสผ่านไม่ถูกต้อง', toast: true, position: 'top', showConfirmButton: false, timer: 2000 });
+    }
+}
+function toggleFilePwVis() {
+    const inp = document.getElementById('accessPassword');
+    const eye = document.getElementById('filePwEye');
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+    eye.className = inp.type === 'text' ? 'fa-solid fa-eye-slash text-sm' : 'fa-solid fa-eye text-sm';
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════
+function renderLinks(loadingId = null) {
+    const container = document.getElementById('linkList');
+    if (!links.length) {
+        container.innerHTML = `<div class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-folder-open text-4xl mb-2 block"></i>
+            <p class="text-sm">ยังไม่มีลิงก์ Google Sheet</p></div>`;
+        return;
+    }
+    const ICON  = { public:'fa-globe text-sky-400', password:'fa-lock text-amber-400', restricted:'fa-user-shield text-violet-400' };
+    const LABEL = { public:'สาธารณะ', password:'ใช้รหัสผ่าน', restricted:'จำกัดสิทธิ์' };
+
+    container.innerHTML = links.map(link => {
+        const loading     = link.id === loadingId;
+        const active      = link.is_active;
+        const statusColor = active ? 'bg-emerald-500' : 'bg-rose-500';
+        const statusText  = active ? 'กำลังเปิดแชร์'  : 'ปิดการแชร์อยู่';
+        const startDisp   = link.start_time ? new Date(link.start_time).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}) : 'ไม่ระบุ';
+        const endDisp     = link.end_time   ? new Date(link.end_time).toLocaleString('th-TH',  {dateStyle:'short',timeStyle:'short'}) : 'ไม่ระบุ';
+        const level       = link.access_level || 'public';
+        const driveTag    = link.anyone_permission_id
+            ? '<span class="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full"><i class="fa-brands fa-google-drive mr-0.5"></i>Drive</span>' : '';
+
+        return `
+        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs hover:shadow-md transition-shadow ${loading ? 'opacity-60 pointer-events-none' : ''}">
+            <div class="flex justify-between items-start gap-2">
+                <div onclick="accessFile('${link.id}')" class="flex-1 cursor-pointer min-w-0">
+                    <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                        <span class="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full text-white ${statusColor}">
+                            <span class="w-1.5 h-1.5 rounded-full bg-white ${active ? 'animate-pulse' : ''}"></span>${statusText}
+                        </span>
+                        <span class="inline-flex items-center gap-1 text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                            <i class="fa-solid ${ICON[level]||ICON.public} text-[9px]"></i> ${LABEL[level]||'สาธารณะ'}
+                        </span>
+                        ${driveTag}
+                    </div>
+                    <h3 class="font-semibold text-slate-800 text-sm line-clamp-1">${escHtml(link.name)}</h3>
+                    <p class="text-[11px] text-slate-400 truncate mt-0.5">${escHtml(link.url)}</p>
+                    ${link.access_note ? `<p class="text-[10px] text-violet-500 mt-1"><i class="fa-solid fa-circle-info mr-0.5"></i>${escHtml(link.access_note)}</p>` : ''}
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer scale-90 shrink-0">
+                    ${loading
+                        ? '<i class="fa-solid fa-rotate spinner text-slate-400 text-lg mt-0.5"></i>'
+                        : `<input type="checkbox" ${active ? 'checked' : ''} onchange="toggleStatus('${link.id}')" class="sr-only peer">
+                           <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>`
+                    }
+                </label>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-50 grid grid-cols-2 text-[10px] text-slate-500 gap-1">
+                <div><i class="fa-solid fa-clock text-emerald-500 mr-1"></i> เริ่ม: <span class="text-slate-700">${startDisp}</span></div>
+                <div><i class="fa-solid fa-clock text-rose-400 mr-1"></i> สิ้นสุด: <span class="text-slate-700">${endDisp}</span></div>
+            </div>
+            <div class="flex justify-end gap-3 mt-3 pt-2 border-t border-dashed border-slate-100">
+                <button onclick="accessFile('${link.id}')" class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> เปิดไฟล์
+                </button>
+                <button onclick="openModal('${link.id}')" class="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1">
+                    <i class="fa-solid fa-pen-to-square"></i> แก้ไข
+                </button>
+                <button onclick="deleteLink('${link.id}')" class="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1">
+                    <i class="fa-solid fa-trash"></i> ลบ
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════════
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toLocalDatetime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso), p = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function showSync(on) { document.getElementById('syncBadge').classList.toggle('hidden', !on); }
+function toast(icon, title) {
+    Swal.fire({ icon, title, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true });
+}
+function showError(title, msg) {
+    Swal.fire({ icon: 'error', title, text: msg, confirmButtonColor: '#10b981' });
+}
+
+document.addEventListener('DOMContentLoaded', initAuth);
+</script>
+</body>
+</html>
